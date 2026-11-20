@@ -1,0 +1,16 @@
+{
+  "name": "@orderverify/engine",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Pure, deterministic M-Pesa order verification rules. No network, no LLM, no database.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}
