@@ -1,0 +1,138 @@
+{
+  "generatedAt": "2026-11-20T08:24:52.556Z",
+  "seed": 20261120,
+  "now": "2026-11-20T09:00:00.000Z",
+  "note": "Synthetic test set. A believable made-up code is missed from text alone and caught when the statement does not contain it.",
+  "textOnly": {
+    "catchRate": 0.8666666666666667,
+    "falseFlagRate": 0.06666666666666667,
+    "matrix": {
+      "genuine": {
+        "RELEASE": 14,
+        "REVIEW": 1,
+        "HOLD": 0
+      },
+      "forged": {
+        "RELEASE": 2,
+        "REVIEW": 0,
+        "HOLD": 13
+      }
+    },
+    "byType": [
+      {
+        "type": "edited_amount",
+        "total": 4,
+        "caught": 4,
+        "missed": 0
+      },
+      {
+        "type": "edited_date",
+        "total": 2,
+        "caught": 2,
+        "missed": 0
+      },
+      {
+        "type": "edited_time",
+        "total": 1,
+        "caught": 1,
+        "missed": 0
+      },
+      {
+        "type": "reused_code",
+        "total": 3,
+        "caught": 3,
+        "missed": 0
+      },
+      {
+        "type": "fabricated_code",
+        "total": 2,
+        "caught": 0,
+        "missed": 2
+      },
+      {
+        "type": "locked_balance",
+        "total": 1,
+        "caught": 1,
+        "missed": 0
+      },
+      {
+        "type": "wrong_sender",
+        "total": 1,
+        "caught": 1,
+        "missed": 0
+      },
+      {
+        "type": "partial_payment",
+        "total": 1,
+        "caught": 1,
+        "missed": 0
+      }
+    ]
+  },
+  "statement": {
+    "catchRate": 1,
+    "falseFlagRate": 0.06666666666666667,
+    "matrix": {
+      "genuine": {
+        "RELEASE": 14,
+        "REVIEW": 1,
+        "HOLD": 0
+      },
+      "forged": {
+        "RELEASE": 0,
+        "REVIEW": 0,
+        "HOLD": 15
+      }
+    },
+    "byType": [
+      {
+        "type": "edited_amount",
+        "total": 4,
+        "caught": 4,
+        "missed": 0
+      },
+      {
+        "type": "edited_date",
+        "total": 2,
+        "caught": 2,
+        "missed": 0
+      },
+      {
+        "type": "edited_time",
+        "total": 1,
+        "caught": 1,
+        "missed": 0
+      },
+      {
+        "type": "reused_code",
+        "total": 3,
+        "caught": 3,
+        "missed": 0
+      },
+      {
+        "type": "fabricated_code",
+        "total": 2,
+        "caught": 2,
+        "missed": 0
+      },
+      {
+        "type": "locked_balance",
+        "total": 1,
+        "caught": 1,
+        "missed": 0
+      },
+      {
+        "type": "wrong_sender",
+        "total": 1,
+        "caught": 1,
+        "missed": 0
+      },
+      {
+        "type": "partial_payment",
+        "total": 1,
+        "caught": 1,
+        "missed": 0
+      }
+    ]
+  }
+}
