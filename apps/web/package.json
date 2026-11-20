@@ -1,0 +1,43 @@
+{
+  "name": "@orderverify/web",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "db:migrate": "tsx src/server/db/migrate.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@hookform/resolvers": "^3.9.1",
+    "@orderverify/engine": "*",
+    "@orderverify/fixtures": "*",
+    "@stellar/stellar-sdk": "^16.4.1",
+    "@x402/core": "2.31.0",
+    "@x402/fetch": "2.31.0",
+    "@x402/stellar": "2.31.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.38.2",
+    "lucide-react": "^0.468.0",
+    "next": "^15.1.0",
+    "postgres": "^3.4.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.54.2",
+    "server-only": "^0.0.1",
+    "tailwind-merge": "^2.6.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
