@@ -1,0 +1,39 @@
+{
+  "name": "orderverify",
+  "private": true,
+  "version": "1.0.0",
+  "description": "OrderVerify: hold risky M-Pesa orders before dispatch, paid per check via x402 on Stellar.",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npx concurrently -n web,api -c green,blue \"npm run dev -w @orderverify/web\" \"npm run dev -w @orderverify/verify-api\"",
+    "dev:web": "npm run dev -w @orderverify/web",
+    "dev:api": "npm run dev -w @orderverify/verify-api",
+    "test": "vitest run",
+    "eval": "tsx scripts/run-eval.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc -p packages/engine --noEmit && tsc -p packages/fixtures --noEmit && tsc -p services/verify-api --noEmit && tsc -p apps/web --noEmit",
+    "check:secrets": "node scripts/check-client-secrets.mjs",
+    "db:up": "docker compose up -d",
+    "db:migrate": "npm run db:migrate -w @orderverify/web",
+    "smoke": "node scripts/x402-smoke.mjs",
+    "wallets": "node scripts/setup-wallets.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "@types/node": "^22.9.0",
+    "concurrently": "^9.1.0",
+    "eslint": "^9.15.0",
+    "prettier": "^3.3.3",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.15.0",
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

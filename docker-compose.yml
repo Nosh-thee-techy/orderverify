@@ -1,0 +1,20 @@
+# Local Postgres for development. Production uses Neon or Supabase.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: orderverify
+      POSTGRES_PASSWORD: orderverify
+      POSTGRES_DB: orderverify
+    ports:
+      - "5433:5432"
+    volumes:
+      - orderverify_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orderverify"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  orderverify_pg:
