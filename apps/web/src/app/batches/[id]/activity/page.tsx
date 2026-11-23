@@ -69,8 +69,8 @@ export default function ActivityPage() {
         : 0;
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t.agentTitle}</h1>
+    <div className="mx-auto max-w-2xl space-y-6">
+      <h1 className="text-3xl font-semibold tracking-tight">{t.agentTitle}</h1>
       <AgentStages stage={stage} />
       {errorCode === "cap_reached" ? <ErrorState title={t.capReached} detail={message} action={<Link className="font-medium underline" href="/wallet">{t.raiseCap}</Link>} /> : null}
       {errorCode === "verify_failed" ? <ErrorState title={t.serviceDown} detail={`${message} ${t.notCharged}`} /> : null}
@@ -80,7 +80,7 @@ export default function ActivityPage() {
         {status !== "done" ? (
           <Link href="/check" className="flex min-h-12 flex-1 items-center justify-center rounded-control border border-line bg-surface">{t.cancel}</Link>
         ) : (
-          <button type="button" className="min-h-12 flex-1 rounded-control bg-primary font-semibold text-white" onClick={() => router.push(`/batches/${params.id}`)}>{t.done}</button>
+          <button type="button" className="min-h-12 flex-1 rounded-control bg-primary font-semibold text-white shadow-sm transition-colors hover:bg-[#0c5a42]" onClick={() => router.push(`/batches/${params.id}`)}>{t.done}</button>
         )}
       </div>
     </div>

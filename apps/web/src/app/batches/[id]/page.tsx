@@ -71,10 +71,10 @@ export default function ResultsPage() {
   const selectedOrder = data?.orders.find((order) => order.id === selected?.orderId);
 
   return (
-    <div className="space-y-4 lg:grid lg:grid-cols-[1fr_360px] lg:gap-4 lg:space-y-0">
-      <div className="space-y-4">
+    <div className="space-y-6 lg:grid lg:grid-cols-[1fr_360px] lg:gap-6 lg:space-y-0">
+      <div className="space-y-6">
         <header>
-          <h1 className="text-2xl font-semibold">{t.results}</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">{t.results}</h1>
           {data?.report ? (
             <p className="tabular text-muted">
               {data.report.counts.hold} hold · {data.report.counts.review} check · {data.report.counts.release} release · {formatKes(data.report.moneyHeldKes)} {t.onHold}
@@ -93,7 +93,7 @@ export default function ResultsPage() {
             const order = data?.orders.find((item) => item.id === verdict.orderId);
             return (
               <li key={verdict.orderId}>
-                <article className="rounded-card border border-line bg-surface p-3">
+                <article className="rounded-card border border-line bg-surface p-4 shadow-sm">
                   <button type="button" className="w-full text-left" onClick={() => setOpen(verdict.orderId)}>
                     <h2 className="font-semibold">{order?.customerName}</h2>
                     <p className="text-sm text-muted">{order?.items.map((item) => `${item.qty} ${item.name}`).join(", ")}</p>
@@ -103,7 +103,7 @@ export default function ResultsPage() {
                     {verdict.verdict === "RELEASE" && verdict.tier === "TEXT_ONLY" ? <p className="mt-2 text-sm text-muted">{t.looksConsistentHint}</p> : null}
                   </button>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <button type="button" className="min-h-12 rounded-control bg-primary px-3 text-sm font-medium text-white" onClick={() => void decide(verdict.orderId, "released")}>{t.release}</button>
+                    <button type="button" className="min-h-12 rounded-control bg-primary px-3 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#0c5a42]" onClick={() => void decide(verdict.orderId, "released")}>{t.release}</button>
                     <button type="button" className="min-h-12 rounded-control border border-line px-3 text-sm" onClick={() => void decide(verdict.orderId, "held")}>{t.keepHold}</button>
                     <button type="button" className="min-h-12 rounded-control border border-line px-3 text-sm" onClick={() => setOpen(verdict.orderId)}>{t.reply}</button>
                   </div>
@@ -128,7 +128,7 @@ export default function ResultsPage() {
         <LimitsPanel />
       </div>
       {selected && selectedOrder ? (
-        <aside className="rounded-card border border-line bg-surface p-4 lg:sticky lg:top-4">
+        <aside className="rounded-card border border-line bg-surface p-5 shadow-sm lg:sticky lg:top-20">
           <OrderDetail verdict={selected} order={selectedOrder} payment={data?.payments.find((item) => item.id === selected.matchedPaymentId)?.rawText ?? ""} draft={data?.drafts[selected.orderId]} lang={lang} />
         </aside>
       ) : null}

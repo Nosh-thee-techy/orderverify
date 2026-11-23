@@ -21,7 +21,7 @@ export default function EvalsPage() {
   const textOnly = results.textOnly as Mode;
   const statement = results.statement as Mode;
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-5xl space-y-8">
       <header>
         <h1 className="text-3xl font-semibold tracking-tight">{t.evalsTitle}</h1>
         <p className="mt-2 max-w-xl text-muted">{results.note || t.evalsNote}</p>

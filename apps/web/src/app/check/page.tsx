@@ -115,9 +115,9 @@ export default function CheckPage() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="mx-auto max-w-2xl space-y-6">
       <Stepper step={step} />
-      <h1 className="text-2xl font-semibold">{step === 1 ? t.yourOrders : step === 2 ? t.yourPayments : t.review}</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">{step === 1 ? t.yourOrders : step === 2 ? t.yourPayments : t.review}</h1>
       {step === 1 ? (
         <>
           <PasteArea label={t.pasteChat} value={chat} onChange={setChat} hint={t.howToExport} />
@@ -150,23 +150,23 @@ export default function CheckPage() {
           {mode === "basic" ? <p className="text-sm text-muted">{t.basicExtraction}</p> : null}
           <ul className="space-y-3">
             {orders.map((order, index) => (
-              <li key={`${order.customerName}-${index}`} className="rounded-card border border-line bg-surface p-3">
+              <li key={`${order.customerName}-${index}`} className="rounded-card border border-line bg-surface p-4 shadow-sm">
                 <label className="block text-sm">
                   {t.customer}
-                  <input className="mt-1 w-full min-h-12 rounded-control border border-line px-3" value={order.customerName} onChange={(event) => update(index, { customerName: event.target.value })} />
+                  <input className="mt-1 w-full min-h-12 rounded-control border border-line bg-paper px-3" value={order.customerName} onChange={(event) => update(index, { customerName: event.target.value })} />
                 </label>
                 <label className="mt-2 block text-sm">
                   {t.items}
-                  <input className="mt-1 w-full min-h-12 rounded-control border border-line px-3" value={order.items.map((item) => item.name).join(", ")} onChange={(event) => update(index, { items: [{ name: event.target.value, qty: 1, unitPriceKes: order.expectedAmountKes }] })} />
+                  <input className="mt-1 w-full min-h-12 rounded-control border border-line bg-paper px-3" value={order.items.map((item) => item.name).join(", ")} onChange={(event) => update(index, { items: [{ name: event.target.value, qty: 1, unitPriceKes: order.expectedAmountKes }] })} />
                 </label>
                 <label className="mt-2 block text-sm">
                   {t.amount}
-                  <input className="mt-1 w-full min-h-12 rounded-control border border-line px-3 tabular" inputMode="numeric" value={order.expectedAmountKes ?? ""} onChange={(event) => update(index, { expectedAmountKes: event.target.value === "" ? null : Number(event.target.value) })} />
+                  <input className="mt-1 w-full min-h-12 rounded-control border border-line bg-paper px-3 tabular" inputMode="numeric" value={order.expectedAmountKes ?? ""} onChange={(event) => update(index, { expectedAmountKes: event.target.value === "" ? null : Number(event.target.value) })} />
                 </label>
                 {order.expectedAmountKes === null ? <p className="mt-2 text-sm text-review">{t.addAmount}</p> : null}
                 <label className="mt-2 block text-sm">
                   {t.code}
-                  <input className="mt-1 w-full min-h-12 rounded-control border border-line px-3 font-mono" value={order.claimedCode ?? ""} onChange={(event) => update(index, { claimedCode: event.target.value || null })} />
+                  <input className="mt-1 w-full min-h-12 rounded-control border border-line bg-paper px-3 font-mono" value={order.claimedCode ?? ""} onChange={(event) => update(index, { claimedCode: event.target.value || null })} />
                 </label>
               </li>
             ))}
@@ -176,14 +176,14 @@ export default function CheckPage() {
       ) : null}
       {error ? <p className="text-sm text-hold" role="alert">{error}</p> : null}
       <div className="flex gap-2">
-        {step > 1 ? <button type="button" className="min-h-12 flex-1 rounded-control border border-line bg-surface" onClick={() => setStep(step - 1)}>{t.back}</button> : null}
-        {step === 1 ? <button type="button" disabled={busy || chat.trim().length < 2} className="min-h-12 flex-1 rounded-control bg-primary font-semibold text-white disabled:opacity-50" onClick={() => void extract()}>{busy ? "…" : t.next}</button> : null}
-        {step === 2 ? <button type="button" className="min-h-12 flex-1 rounded-control bg-primary font-semibold text-white" onClick={() => setStep(3)}>{t.next}</button> : null}
+        {step > 1 ? <button type="button" className="min-h-12 flex-1 rounded-control border border-line bg-surface shadow-sm" onClick={() => setStep(step - 1)}>{t.back}</button> : null}
+        {step === 1 ? <button type="button" disabled={busy || chat.trim().length < 2} className="min-h-12 flex-1 rounded-control bg-primary font-semibold text-white shadow-sm transition-colors hover:bg-[#0c5a42] disabled:opacity-50" onClick={() => void extract()}>{busy ? "…" : t.next}</button> : null}
+        {step === 2 ? <button type="button" className="min-h-12 flex-1 rounded-control bg-primary font-semibold text-white shadow-sm transition-colors hover:bg-[#0c5a42]" onClick={() => setStep(3)}>{t.next}</button> : null}
         {step === 3 ? (
           blocked ? (
             <Link href="/wallet" className="flex min-h-12 flex-1 items-center justify-center rounded-control bg-hold font-semibold text-white">{t.raiseCap}</Link>
           ) : (
-            <button type="button" disabled={busy || orders.length === 0} className="min-h-12 flex-1 rounded-control bg-primary font-semibold text-white disabled:opacity-50" onClick={() => void run()}>{busy ? "…" : t.runCheck}</button>
+            <button type="button" disabled={busy || orders.length === 0} className="min-h-12 flex-1 rounded-control bg-primary font-semibold text-white shadow-sm transition-colors hover:bg-[#0c5a42] disabled:opacity-50" onClick={() => void run()}>{busy ? "…" : t.runCheck}</button>
           )
         ) : null}
       </div>

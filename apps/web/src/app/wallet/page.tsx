@@ -43,18 +43,18 @@ export default function WalletPage() {
   const spentKes = (home?.spentUsd ?? 0) * (home?.kesPerUsd ?? 129);
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">{t.walletTitle}</h1>
-      <section className="rounded-card bg-primary p-5 text-white">
+    <div className="mx-auto max-w-2xl space-y-6">
+      <h1 className="text-3xl font-semibold tracking-tight">{t.walletTitle}</h1>
+      <section className="rounded-card bg-primary p-6 text-white shadow-sm">
         <p className="text-sm text-white/80">KES</p>
-        <p className="tabular text-3xl font-semibold">{Math.round(kes).toLocaleString("en-KE")}</p>
+        <p className="tabular text-3xl font-semibold tracking-tight">{Math.round(kes).toLocaleString("en-KE")}</p>
         <p className="tabular text-sm">{(home?.walletBalanceUsd ?? 0).toFixed(2)} USDC</p>
-        <p className="mt-3 text-sm">{t.simulatedNote}</p>
+        <p className="mt-3 text-sm text-white/90">{t.simulatedNote}</p>
       </section>
       <p className="text-sm">{health?.verify ? t.serviceOnline : t.serviceOffline}</p>
       <button
         type="button"
-        className="min-h-12 w-full rounded-control border border-primary text-primary"
+        className="min-h-12 w-full rounded-control border border-primary bg-surface font-semibold text-primary shadow-sm transition-colors hover:bg-paper"
         onClick={async () => {
           await fetch("/api/seller/topup", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ amountUsd: 1 }) });
           await load();
@@ -62,17 +62,17 @@ export default function WalletPage() {
       >
         {t.topUp} · $1
       </button>
-      <section className="rounded-card border border-line bg-surface p-4">
+      <section className="rounded-card border border-line bg-surface p-5 shadow-sm">
         <h2 className="font-medium">{t.weeklyCap}</h2>
         <label className="mt-3 block text-sm">
           KES
-          <input className="mt-1 w-full min-h-12 rounded-control border border-line px-3 tabular" type="number" min={0} value={cap} onChange={(event) => setCap(Number(event.target.value))} />
+          <input className="mt-1 w-full min-h-12 rounded-control border border-line bg-paper px-3 tabular" type="number" min={0} value={cap} onChange={(event) => setCap(Number(event.target.value))} />
         </label>
         <input className="mt-3 w-full" type="range" min={0} max={500} value={cap} onChange={(event) => setCap(Number(event.target.value))} aria-label={t.weeklyCap} />
         <div className="mt-3"><CapMeter spentKes={spentKes} capKes={cap} /></div>
         <button
           type="button"
-          className="mt-3 min-h-12 w-full rounded-control bg-primary text-white"
+          className="mt-3 min-h-12 w-full rounded-control bg-primary font-semibold text-white shadow-sm transition-colors hover:bg-[#0c5a42]"
           onClick={async () => {
             await fetch("/api/seller", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ weeklyCapKes: cap }) });
             await load();
@@ -104,7 +104,7 @@ export default function WalletPage() {
           ))}
         </div>
       </section>
-      <details className="rounded-card border border-line bg-surface p-4">
+      <details className="rounded-card border border-line bg-surface p-5 shadow-sm">
         <summary className="cursor-pointer font-medium">{t.howTitle}</summary>
         <p className="mt-2 text-sm text-muted">{t.howBody}</p>
       </details>

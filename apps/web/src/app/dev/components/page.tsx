@@ -17,7 +17,7 @@ export default function ComponentGallery() {
       <h1 className="text-2xl font-semibold">Components</h1>
       <HeroHoldCard holdKes={18400} holdCount={3} />
       <HeroHoldCard holdKes={0} holdCount={0} />
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatChip label="To check" value={4} />
         <StatChip label="On hold" value={3} tone="hold" />
         <StatChip label="Released" value={2} tone="release" />
