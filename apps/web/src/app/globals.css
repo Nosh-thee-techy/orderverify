@@ -42,8 +42,24 @@ body {
 }
 
 /*
- * Public marketing surface. Apply `.marketing-page` on the landing wrapper so
- * dashboard screens keep the green product theme.
+ * Authenticated product surface. Cream paper, plum type, orange focus.
+ * Landing keeps its own `.marketing-page` wrapper.
+ */
+.dashboard-page {
+  --paper: #fffbf0;
+  --ink: #2a1020;
+  --focus: #c85a0c;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.dashboard-page :focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/*
+ * Public marketing surface. Apply `.marketing-page` on the landing wrapper.
  */
 .marketing-page {
   --paper: #fffbf0;
@@ -126,5 +142,25 @@ body {
   .marketing-page *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes ov-tracker-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(228, 112, 29, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(228, 112, 29, 0);
+  }
+}
+
+.ov-tracker-pulse {
+  animation: ov-tracker-pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ov-tracker-pulse {
+    animation: none;
   }
 }

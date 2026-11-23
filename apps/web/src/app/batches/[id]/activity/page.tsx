@@ -1,14 +1,18 @@
 /**
  * apps/web/src/app/batches/[id]/activity/page.tsx
- * The demo moment: payment required, paid, report delivered, with the live timeline.
+ * Live verification: visual stage tracker driven by real agent events,
+ * then the completed report on the same page.
  */
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { AgentStages, AgentTimeline, ErrorState } from "@/components/bits";
+import { useParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { AgentTimeline, ErrorState } from "@/components/bits";
+import { VerificationReport, type ReportPayload } from "@/components/VerificationReport";
+import { VerificationTracker } from "@/components/VerificationTracker";
 import { useI18n } from "@/i18n";
+import { trackerFromEvents } from "@/lib/verificationProgress";
 
 interface AgentEvent {
   id: number;
@@ -21,12 +25,12 @@ interface AgentEvent {
 /** Full-screen activity. Starts the run, then follows events until the batch finishes. */
 export default function ActivityPage() {
   const params = useParams<{ id: string }>();
-  const router = useRouter();
   const { t } = useI18n();
   const [events, setEvents] = useState<AgentEvent[]>([]);
   const [status, setStatus] = useState("paying");
   const [errorCode, setErrorCode] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [payload, setPayload] = useState<ReportPayload | null>(null);
 
   useEffect(() => {
     let stopped = false;
@@ -57,32 +61,79 @@ export default function ActivityPage() {
       setErrorCode(body.errorCode);
       if (["done", "error", "blocked_cap"].includes(body.status)) stopped = true;
     }, 1000);
-    return () => clearInterval(timer);
+    return () => {
+      stopped = true;
+      clearInterval(timer);
+    };
   }, [params.id]);
 
-  const stage: 0 | 1 | 2 | 3 = events.some((event) => event.kind === "report_received" || event.kind === "held")
-    ? 3
-    : events.some((event) => event.kind === "settled" || event.kind === "signed")
-      ? 2
-      : events.some((event) => event.kind === "payment_required")
-        ? 1
-        : 0;
+  useEffect(() => {
+    if (status !== "done") return;
+    void fetch(`/api/batches/${params.id}`)
+      .then((response) => response.json())
+      .then((body: ReportPayload) => {
+        if (body.report) {
+          setPayload(body);
+          window.requestAnimationFrame(() => {
+            document.getElementById("verification-report")?.scrollIntoView({ block: "start" });
+          });
+        }
+      })
+      .catch(() => undefined);
+  }, [params.id, status]);
+
+  const snapshot = useMemo(() => trackerFromEvents(events, status), [events, status]);
+
+  async function decide(orderId: string, decision: "released" | "held" | "more_info") {
+    await fetch(`/api/orders/${orderId}/decision`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ decision }),
+    });
+    const response = await fetch(`/api/batches/${params.id}`);
+    if (response.ok) {
+      const body = (await response.json()) as ReportPayload;
+      if (body.report) setPayload(body);
+    }
+  }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-3xl font-semibold tracking-tight">{t.agentTitle}</h1>
-      <AgentStages stage={stage} />
-      {errorCode === "cap_reached" ? <ErrorState title={t.capReached} detail={message} action={<Link className="font-medium underline" href="/wallet">{t.raiseCap}</Link>} /> : null}
+    <div className="mx-auto max-w-4xl space-y-6">
+      {payload ? null : <VerificationTracker snapshot={snapshot} t={t} />}
+
+      {errorCode === "cap_reached" ? (
+        <ErrorState title={t.capReached} detail={message} action={<Link className="font-medium underline" href="/wallet">{t.raiseCap}</Link>} />
+      ) : null}
       {errorCode === "verify_failed" ? <ErrorState title={t.serviceDown} detail={`${message} ${t.notCharged}`} /> : null}
       {status === "error" && !errorCode ? <ErrorState title={t.serviceDown} detail={message} /> : null}
-      <AgentTimeline events={events} />
-      <div className="flex gap-2">
-        {status !== "done" ? (
-          <Link href="/check" className="flex min-h-12 flex-1 items-center justify-center rounded-control border border-line bg-surface">{t.cancel}</Link>
-        ) : (
-          <button type="button" className="min-h-12 flex-1 rounded-control bg-primary font-semibold text-white shadow-sm transition-colors hover:bg-[#0c5a42]" onClick={() => router.push(`/batches/${params.id}`)}>{t.done}</button>
-        )}
-      </div>
+
+      {snapshot.complete ? (
+        <div className="rounded-brand-card border border-[#E3F8EC] bg-[#E3F8EC] px-4 py-3 text-[#0E9F5B]" role="status">
+          <p className="font-semibold">{t.reportComplete}</p>
+          {payload ? null : (
+            <a className="mt-1 inline-block text-sm underline" href="#verification-report">
+              {t.viewReport}
+            </a>
+          )}
+        </div>
+      ) : null}
+
+      {events.length > 0 ? (
+        <details className="rounded-brand-card border border-[#F0E2C8] bg-white px-4 py-3">
+          <summary className="cursor-pointer font-medium text-brand-ink">{t.eventLog}</summary>
+          <AgentTimeline events={events} />
+        </details>
+      ) : null}
+
+      {payload ? <VerificationReport payload={payload} onDecide={decide} /> : null}
+
+      {status !== "done" ? (
+        <div className="flex gap-2">
+          <Link href="/check" className="flex min-h-12 flex-1 items-center justify-center rounded-brand-control border border-[#F0E2C8] bg-white">
+            {t.cancel}
+          </Link>
+        </div>
+      ) : null}
     </div>
   );
 }
