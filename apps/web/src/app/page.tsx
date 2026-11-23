@@ -2,11 +2,11 @@
  * apps/web/src/app/page.tsx
  * Public landing page. Later tasks fill the sections under this navigation.
  */
-import { BenefitsStrip, HeroCarousel, MarketingPage, Navbar } from "@/components/marketing";
+import { AboutSection, BenefitsStrip, HeroCarousel, MarketingPage, Navbar } from "@/components/marketing";
 
 /**
- * Public homepage: sticky marketing nav, photographic hero, and named section targets.
- * Remaining section bodies are intentionally empty until later tasks.
+ * Public homepage: sticky marketing nav, photographic hero, benefits strip,
+ * and About. Remaining section bodies are empty until later tasks.
  */
 export default function LandingPage() {
   return (
@@ -15,11 +15,7 @@ export default function LandingPage() {
       <main>
         <HeroCarousel />
         <BenefitsStrip />
-        <section id="about" className="scroll-mt-24 min-h-[70vh]" aria-labelledby="about-heading">
-          <h2 id="about-heading" className="sr-only">
-            About OrderVerify
-          </h2>
-        </section>
+        <AboutSection />
         <section id="how-it-works" className="scroll-mt-24 min-h-[70vh]" aria-labelledby="how-it-works-heading">
           <h2 id="how-it-works-heading" className="sr-only">
             How OrderVerify Works
