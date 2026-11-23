@@ -82,6 +82,8 @@ An unpaid call prints 402. The paid call prints 200, the settlement, and a Stell
 | `DEFAULT_WEEKLY_CAP_KES` | Cap for a new seller. Default 50 |
 | `PHONE_HASH_SALT` | Salt for phone hashes |
 | `RETENTION_DAYS` | Raw chat retention. Default 7 |
+| `RESEND_API_KEY` | Email provider used to send verification reports to users |
+| `EMAIL_FROM` | orderverify email |
 
 ## Checks
 
