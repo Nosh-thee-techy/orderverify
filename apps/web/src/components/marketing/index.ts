@@ -15,3 +15,4 @@ export { ReportPreview } from "./ReportPreview";
 export { Section } from "./Section";
 export { SectionHeading } from "./SectionHeading";
 export { StatusBadge, type MarketingStatus } from "./StatusBadge";
+export { WhyChoose } from "./WhyChoose";
