@@ -7,6 +7,7 @@ export { BenefitsStrip } from "./BenefitsStrip";
 export { Button, buttonVariants, type ButtonProps } from "./Button";
 export { Container } from "./Container";
 export { HeroCarousel } from "./HeroCarousel";
+export { HowItWorks } from "./HowItWorks";
 export { Logo } from "./Logo";
 export { MarketingPage } from "./MarketingPage";
 export { Navbar } from "./Navbar";
