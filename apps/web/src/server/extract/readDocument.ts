@@ -6,6 +6,8 @@
 import "server-only";
 
 const MAX_CHARS = 1_000_000;
+const OCR_PAGE_LIMIT = 3;
+const MIN_OCR_IMAGE = 240;
 
 /**
  * Extract readable text from a document buffer.
@@ -82,9 +84,127 @@ function isZipSignature(bytes: Uint8Array): boolean {
 }
 
 async function readPdf(bytes: Uint8Array): Promise<string> {
-  const { extractText } = await import("unpdf");
-  const result = await extractText(bytes, { mergePages: true });
-  return Array.isArray(result.text) ? result.text.join("\n") : String(result.text ?? "");
+  const unpdf = await import("unpdf");
+  const fromItems = await readPdfTextItems(unpdf, bytes);
+  const fromExtract = await readPdfExtractText(unpdf, bytes);
+  let text = richerText(fromItems, fromExtract);
+  if (!looksLikeStatementText(text)) {
+    const ocr = await readPdfOcr(unpdf, bytes);
+    text = richerText(text, ocr);
+  }
+  return text;
+}
+
+async function readPdfExtractText(
+  unpdf: typeof import("unpdf"),
+  bytes: Uint8Array,
+): Promise<string> {
+  try {
+    const result = await unpdf.extractText(bytes, { mergePages: true });
+    return Array.isArray(result.text) ? result.text.join("\n") : String(result.text ?? "");
+  } catch {
+    return "";
+  }
+}
+
+async function readPdfTextItems(
+  unpdf: typeof import("unpdf"),
+  bytes: Uint8Array,
+): Promise<string> {
+  try {
+    const result = await unpdf.extractTextItems(bytes);
+    return reconstructPdfLines(result.items);
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Rebuild table rows from PDF.js text items using Y position.
+ * Safaricom statements keep Receipt No, time, details, and amounts on one visual row.
+ *
+ * @param pages - Text items grouped by page
+ * @returns Plain text, one reconstructed row per line
+ */
+function reconstructPdfLines(
+  pages: { str: string; x: number; y: number; height: number; hasEOL: boolean }[][],
+): string {
+  const lines: string[] = [];
+  for (const page of pages) {
+    const items = page.filter((item) => item.str.trim());
+    if (items.length === 0) continue;
+    const heights = items.map((item) => item.height).sort((a, b) => a - b);
+    const mid = heights[Math.floor(heights.length / 2)] ?? 8;
+    const tolerance = Math.max(3, mid * 0.7);
+    const sorted = [...items].sort((a, b) => b.y - a.y || a.x - b.x);
+    const clusters: typeof items[] = [];
+    for (const item of sorted) {
+      const last = clusters[clusters.length - 1];
+      const anchor = last?.[0];
+      if (last && anchor && Math.abs(anchor.y - item.y) <= tolerance) {
+        last.push(item);
+      } else {
+        clusters.push([item]);
+      }
+    }
+    for (const cluster of clusters) {
+      cluster.sort((a, b) => a.x - b.x);
+      lines.push(cluster.map((item) => item.str).join(" ").replace(/\s+/g, " ").trim());
+    }
+    lines.push("");
+  }
+  return lines.join("\n");
+}
+
+async function readPdfOcr(unpdf: typeof import("unpdf"), bytes: Uint8Array): Promise<string> {
+  let pageCount = 1;
+  try {
+    const info = await unpdf.inspectPages(bytes);
+    pageCount = info.totalPages;
+  } catch {
+    pageCount = 1;
+  }
+  const chunks: string[] = [];
+  const pages = Math.min(Math.max(pageCount, 1), OCR_PAGE_LIMIT);
+  for (let page = 1; page <= pages; page++) {
+    let images: { data: Uint8Array; width: number; height: number }[] = [];
+    try {
+      images = await unpdf.extractImages(bytes, page, { format: "png" });
+    } catch {
+      continue;
+    }
+    for (const image of images) {
+      if (image.width < MIN_OCR_IMAGE || image.height < MIN_OCR_IMAGE) continue;
+      try {
+        chunks.push(await readImage(image.data));
+      } catch {
+        // One bad image must not block the rest of the statement.
+      }
+    }
+  }
+  return chunks.join("\n");
+}
+
+function looksLikeStatementText(text: string): boolean {
+  if (!text.trim()) return false;
+  const receipts = text.toUpperCase().match(/\b[A-Z][A-Z0-9]{9}\b/g) ?? [];
+  if (receipts.some((code) => /\d/.test(code))) return true;
+  return /receipt/i.test(text) && /(\d{1,3}(?:,\d{3})*\.\d{2})/.test(text);
+}
+
+function richerText(left: string, right: string): string {
+  const leftScore = scoreExtract(left);
+  const rightScore = scoreExtract(right);
+  if (rightScore > leftScore) return right;
+  if (leftScore > 0) return left;
+  return right.length > left.length ? right : left;
+}
+
+function scoreExtract(text: string): number {
+  if (!text.trim()) return 0;
+  const receipts = text.toUpperCase().match(/\b[A-Z][A-Z0-9]{9}\b/g) ?? [];
+  const withDigit = receipts.filter((code) => /\d/.test(code)).length;
+  return withDigit * 10 + Math.min(text.length, 4000) / 400;
 }
 
 async function readDocx(bytes: Uint8Array): Promise<string> {

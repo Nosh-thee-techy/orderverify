@@ -8,7 +8,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
-import { CalendarCheck, Menu, Rocket, Settings, ShieldCheck, Wallet, X } from "lucide-react";
+import { CalendarCheck, Home, Menu, Rocket, Settings, ShieldCheck, Wallet, X } from "lucide-react";
 import { LanguageMenu } from "@/components/LanguageMenu";
 import { Logo } from "@/components/marketing/Logo";
 import { cn } from "@/lib/cn";
@@ -207,7 +207,7 @@ function initials(name: string): string {
 }
 
 /**
- * Today / Check / Wallet / Settings. Destinations are unchanged.
+ * Home (public landing) plus Today / Check / Wallet / Settings.
  *
  * @param props.path - Current pathname for the active state
  */
@@ -215,6 +215,9 @@ function SidebarLinks({ path }: { path: string }) {
   const { t } = useI18n();
   return (
     <ul className="space-y-1.5">
+      <li>
+        <NavLink href="/" active={false} label={t.homePage} icon={Home} />
+      </li>
       {tabs.map((tab) => (
         <li key={tab.href}>
           <NavLink href={tab.href} active={isActive(path, tab.href)} label={t.tabs[tab.key]} icon={tab.icon} />
@@ -235,14 +238,21 @@ function NavLink({
   label: string;
   icon: typeof Wallet;
 }) {
+  const className = cn(
+    "flex min-h-12 items-center gap-3 rounded-brand-control px-3 text-[0.95rem] font-medium transition-colors duration-200 ease-brand",
+    active ? "bg-brand-sunset text-white shadow-brand-sm" : "text-brand-ink/80 hover:bg-[#FFF6E0] hover:text-brand-ink",
+  );
+  // The public landing page is a full document, not a dashboard route.
+  if (href === "/") {
+    return (
+      <a href="/" className={className}>
+        <Icon aria-hidden className="h-5 w-5 shrink-0" />
+        {label}
+      </a>
+    );
+  }
   return (
-    <Link
-      href={href}
-      className={cn(
-        "flex min-h-12 items-center gap-3 rounded-brand-control px-3 text-[0.95rem] font-medium transition-colors duration-200 ease-brand",
-        active ? "bg-brand-sunset text-white shadow-brand-sm" : "text-brand-ink/80 hover:bg-[#FFF6E0] hover:text-brand-ink",
-      )}
-    >
+    <Link href={href} className={className}>
       <Icon aria-hidden className="h-5 w-5 shrink-0" />
       {label}
     </Link>

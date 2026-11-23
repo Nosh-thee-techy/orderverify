@@ -105,7 +105,7 @@ export function Stepper({ step }: { step: number }) {
   const { t } = useI18n();
   return (
     <div>
-      <p className="text-sm text-muted">{t.step} {step} {t.of} 3</p>
+      <p className="text-sm text-brand-muted">{t.step} {step} {t.of} 3</p>
       <div className="mt-3 grid grid-cols-3 gap-2" aria-hidden>
         {[1, 2, 3].map((item) => (
           <div key={item} className={cn("h-2 rounded-full", item <= step ? "bg-brand-orange" : "bg-[#F0E2C8]")} />
@@ -119,9 +119,9 @@ export function Stepper({ step }: { step: number }) {
 export function PasteArea({ label, value, onChange, hint }: { label: string; value: string; onChange: (value: string) => void; hint?: string }) {
   return (
     <label className="block">
-      <span className="mb-2 block font-medium">{label}</span>
+      <span className="mb-2 block font-medium text-brand-ink">{label}</span>
       <textarea value={value} onChange={(event) => onChange(event.target.value)} rows={8} className="w-full rounded-brand-control border border-[#F0E2C8] bg-white p-3 text-base shadow-brand-sm outline-none transition-shadow focus:border-brand-orange/40 focus:shadow-[0_0_0_3px_rgba(200,90,12,0.15)]" />
-      {hint ? <span className="mt-2 block text-sm text-muted">{hint}</span> : null}
+      {hint ? <span className="mt-2 block text-sm text-brand-muted">{hint}</span> : null}
     </label>
   );
 }
@@ -129,15 +129,19 @@ export function PasteArea({ label, value, onChange, hint }: { label: string; val
 /**
  * File picker for any document. Text files are read locally; everything else
  * is sent to the server so PDF, Word, sheets, zips, and images can be read.
+ *
+ * @param props.okLabel - Success copy; defaults to the generic loaded message
  */
 export function FileDrop({
   label,
   accept,
   onText,
+  okLabel,
 }: {
   label: string;
   accept?: string;
   onText: (text: string, name: string) => void;
+  okLabel?: string;
 }) {
   const { t } = useI18n();
   const [status, setStatus] = useState<"idle" | "reading" | "ok" | "error">("idle");
@@ -175,13 +179,13 @@ export function FileDrop({
         />
       </label>
       {status === "ok" ? (
-        <p className="mt-2 text-sm text-muted">
-          {t.documentLoaded}
+        <p className="mt-2 text-sm text-brand-muted">
+          {okLabel ?? t.documentLoaded}
           {fileName ? ` · ${fileName}` : ""}
         </p>
       ) : null}
       {status === "error" ? (
-        <p className="mt-2 text-sm text-hold" role="alert">
+        <p className="mt-2 text-sm text-brand-hold" role="alert">
           {t.documentFailed}
         </p>
       ) : null}
@@ -221,7 +225,7 @@ function canReadLocally(file: File): boolean {
 export function TrustMeter({ strong }: { strong: boolean }) {
   const { t } = useI18n();
   return (
-    <div className={cn("rounded-card border p-4 text-sm", strong ? "border-info/15 bg-info-bg text-info" : "border-review/15 bg-review-bg text-review")}>
+    <div className={cn("rounded-brand-card border p-4 text-sm", strong ? "border-brand-orange/25 bg-[#FFF4C2] text-brand-orange" : "border-[#F0E2C8] bg-white text-brand-ink")}>
       <p className="font-medium">{strong ? t.trustStrong : t.trustBasic}</p>
       <p className="mt-1">{t.trustHint}</p>
     </div>
@@ -334,9 +338,9 @@ export function AgentTimeline({
     <ol className="mt-4 space-y-3">
       {events.map((event) => (
         <li key={event.id} className="rounded-brand-card border border-[#F0E2C8] bg-white p-4 shadow-brand-sm">
-          <p className="text-xs text-muted">{new Date(event.at).toLocaleTimeString()}</p>
-          <p>{event.message}</p>
-          {event.data?.amountUsd ? <p className="font-mono text-sm text-muted">{event.data.amountUsd} USDC · {event.data.network}</p> : null}
+          <p className="text-xs text-brand-muted">{new Date(event.at).toLocaleTimeString()}</p>
+          <p className="text-brand-ink">{event.message}</p>
+          {event.data?.amountUsd ? <p className="font-mono text-sm text-brand-muted">{event.data.amountUsd} USDC · {event.data.network}</p> : null}
           {event.data?.txHash ? <TxHashChip hash={event.data.txHash} /> : null}
         </li>
       ))}
@@ -347,20 +351,28 @@ export function AgentTimeline({
 /** One rule, with an expandable evidence list. */
 export function CheckRow({ title, plain, status, evidence }: { title: string; plain: string; status: string; evidence: Record<string, string | number | null> }) {
   const mark = status === "fail" ? "✕" : status === "warn" ? "!" : status === "pass" ? "✓" : "–";
+  const markColor =
+    status === "fail"
+      ? "text-brand-hold"
+      : status === "warn"
+        ? "text-brand-tangerine"
+        : status === "pass"
+          ? "text-brand-orange"
+          : "text-brand-muted";
   return (
-    <details className="rounded-control border border-line bg-surface p-4">
+    <details className="rounded-brand-control border border-[#F0E2C8] bg-white p-4">
       <summary className="flex cursor-pointer items-start gap-3">
-        <span aria-hidden className="mt-0.5 font-semibold">{mark}</span>
+        <span aria-hidden className={cn("mt-0.5 font-semibold", markColor)}>{mark}</span>
         <span>
-          <span className="block font-medium">{title}</span>
-          <span className="block text-sm text-muted">{plain}</span>
+          <span className="block font-medium text-brand-ink">{title}</span>
+          <span className="block text-sm text-brand-muted">{plain}</span>
         </span>
       </summary>
       <dl className="mt-3 space-y-1 pl-7 text-sm">
         {Object.entries(evidence).map(([key, value]) => (
           <div key={key} className="flex justify-between gap-3">
-            <dt className="text-muted">{key}</dt>
-            <dd className="font-mono">{value === null ? "—" : String(value)}</dd>
+            <dt className="text-brand-muted">{key}</dt>
+            <dd className="font-mono text-brand-ink">{value === null ? "—" : String(value)}</dd>
           </div>
         ))}
       </dl>
@@ -426,8 +438,8 @@ export function LimitsPanel() {
     : "A well-made message with a believable code cannot be caught from the text alone. Upload your M-Pesa statement for a stronger check. We do not call Safaricom, and we cannot see your balance ourselves.";
   return (
     <details className="rounded-brand-card border border-[#F0E2C8] bg-white p-5 shadow-brand-sm">
-      <summary className="cursor-pointer font-medium">{t.limitsTitle}</summary>
-      <p className="mt-3 text-sm text-muted">{body}</p>
+      <summary className="cursor-pointer font-medium text-brand-ink">{t.limitsTitle}</summary>
+      <p className="mt-3 text-sm text-brand-muted">{body}</p>
     </details>
   );
 }

@@ -32,7 +32,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "empty_text", fileName: file.name }, { status: 422 });
     }
     return NextResponse.json({ text, fileName: file.name });
-  } catch {
+  } catch (error) {
+    console.error("document extract failed", file.name, error);
     return NextResponse.json({ error: "read_failed", fileName: file.name }, { status: 422 });
   }
 }

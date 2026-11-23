@@ -12,7 +12,7 @@ import type { BatchReport } from "@orderverify/engine";
 const PLUM = rgb(0.165, 0.063, 0.125);
 const MUTED = rgb(0.478, 0.4, 0.439);
 const ORANGE = rgb(0.894, 0.439, 0.114);
-const GREEN = rgb(0.055, 0.624, 0.357);
+const BRAND_ORANGE = rgb(0.784, 0.353, 0.047);
 const BLUE = rgb(0.141, 0.341, 0.839);
 const HOLD = rgb(0.702, 0.071, 0.169);
 const YELLOW = rgb(1, 0.831, 0.086);
@@ -131,7 +131,7 @@ export async function buildReportPdf(
   y -= 10;
   const cards = [
     { label: t.total, value: String(doc.counts.total), color: PLUM },
-    { label: t.release, value: String(doc.counts.release), color: GREEN },
+    { label: t.release, value: String(doc.counts.release), color: BRAND_ORANGE },
     { label: t.review, value: String(doc.counts.review), color: BLUE },
     { label: t.hold, value: String(doc.counts.hold), color: HOLD },
   ];
@@ -282,7 +282,7 @@ function wrapPreview(text: string, font: PDFFont, size: number, width: number): 
 }
 
 function verdictColor(verdict: string) {
-  if (verdict === "RELEASE") return GREEN;
+  if (verdict === "RELEASE") return BRAND_ORANGE;
   if (verdict === "HOLD") return HOLD;
   return BLUE;
 }

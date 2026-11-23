@@ -1,6 +1,6 @@
 /**
  * apps/web/src/components/VerdictBadge.tsx
- * The trust badge. A text-only release is never a solid green "verified".
+ * The trust badge. A text-only release is never a solid “verified” mark.
  */
 import { Eye, OctagonPause, ShieldCheck, ShieldQuestion } from "lucide-react";
 import type { EvidenceTier, Verdict } from "@orderverify/engine";
@@ -39,7 +39,7 @@ export function VerdictBadge({
   const text = copy[lang];
   if (verdict === "HOLD") {
     return (
-      <Badge className="bg-hold-bg text-hold">
+      <Badge className="bg-brand-hold-bg text-brand-hold">
         <OctagonPause aria-hidden className="h-4 w-4" />
         {text.HOLD}
       </Badge>
@@ -47,7 +47,7 @@ export function VerdictBadge({
   }
   if (verdict === "REVIEW") {
     return (
-      <Badge className="bg-review-bg text-review">
+      <Badge className="bg-brand-review-bg text-brand-review">
         <Eye aria-hidden className="h-4 w-4" />
         {text.REVIEW}
       </Badge>
@@ -55,14 +55,14 @@ export function VerdictBadge({
   }
   if (tier === "STATEMENT_VERIFIED") {
     return (
-      <Badge className="bg-release-bg text-release">
+      <Badge className="bg-[#FFF4C2] text-brand-orange">
         <ShieldCheck aria-hidden className="h-4 w-4" />
         {text.RELEASE_STATEMENT}
       </Badge>
     );
   }
   return (
-    <Badge className="border border-release bg-transparent text-release">
+    <Badge className="border border-brand-orange bg-transparent text-brand-orange">
       <ShieldQuestion aria-hidden className="h-4 w-4" />
       {text.RELEASE_TEXT}
     </Badge>

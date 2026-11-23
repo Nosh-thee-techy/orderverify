@@ -3,7 +3,8 @@
  * WhatsApp exports and statement CSVs are untrusted files from the seller's phone.
  */
 import { describe, expect, it } from "vitest";
-import { parseStatement, parseStatementCsv } from "./parseStatement.js";
+import { parseMpesaMessage } from "./parseMpesa.js";
+import { parseStatement, parseStatementCsv, statementRowToMpesaText } from "./parseStatement.js";
 import { parseWhatsAppExport } from "./parseWhatsApp.js";
 import { redactPhones } from "./redact.js";
 import { weekStartNairobi } from "./dates.js";
@@ -38,6 +39,59 @@ describe("parseStatement", () => {
     expect(rows).toHaveLength(2);
     expect(rows[0]?.receiptNo).toBe("UKC1234567");
     expect(rows[0]?.paidInKes).toBe(2500);
+  });
+
+  it("reads a Safaricom PDF extract where each table cell is on its own line", () => {
+    const text = [
+      "M-PESA STATEMENT",
+      "Request Date: 23 Nov 2026",
+      "Receipt No.",
+      "Completion Time",
+      "Details",
+      "Transaction Status",
+      "Paid In",
+      "Withdrawn",
+      "Balance",
+      "SFC6H7K2L1",
+      "12/11/2026 14:02:11",
+      "Funds received from 254712345678 - MARY WANJIKU",
+      "Completed",
+      "2,500.00",
+      "0.00",
+      "8,000.00",
+      "QBR3N9P4T2",
+      "12/11/2026 15:10:00",
+      "Pay Bill Charge",
+      "Completed",
+      "0.00",
+      "4.00",
+      "7,996.00",
+    ].join("\n");
+    const rows = parseStatement(text);
+    expect(rows.map((row) => row.receiptNo)).toEqual(["SFC6H7K2L1", "QBR3N9P4T2"]);
+    expect(rows[0]?.paidInKes).toBe(2500);
+    expect(rows[0]?.withdrawnKes).toBe(0);
+    expect(rows[1]?.paidInKes).toBe(0);
+    expect(rows[1]?.withdrawnKes).toBe(4);
+  });
+
+  it("glues OCR-split receipt codes and ignores the word COMPLETION", () => {
+    const text = "C O M P L E T I O N\nU K C 1 2 3 4 5 6 7 12/11/2026 14:02:00 Completed 1,200.00 0.00 3,000.00";
+    const rows = parseStatement(text);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.receiptNo).toBe("UKC1234567");
+    expect(rows[0]?.paidInKes).toBe(1200);
+  });
+
+  it("turns a paid-in row into a message the SMS parser can read", () => {
+    const [row] = parseStatement(
+      "UKC1234567 12/11/2026 14:02:00 Funds received from MARY WANJIKU Completed 2,500.00 0.00 8,000.00",
+    );
+    expect(row).toBeTruthy();
+    const parsed = parseMpesaMessage(statementRowToMpesaText(row!));
+    expect(parsed.ok).toBe(true);
+    expect(parsed.fields.code).toBe("UKC1234567");
+    expect(parsed.fields.amountKes).toBe(2500);
   });
 });
 

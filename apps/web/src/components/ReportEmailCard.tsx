@@ -90,7 +90,7 @@ export function ReportEmailCard({ batchId }: { batchId: string }) {
             </button>
           </form>
           {message ? (
-            <p className={`mt-3 text-sm ${ok ? "text-brand-release" : "text-brand-hold"}`} role="status">
+            <p className={`mt-3 text-sm ${ok ? "text-brand-orange" : "text-brand-hold"}`} role="status">
               {message}
             </p>
           ) : null}

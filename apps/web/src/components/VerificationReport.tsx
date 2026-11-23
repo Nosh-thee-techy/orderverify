@@ -190,7 +190,7 @@ export function VerificationReport({
           </div>
           {alreadySent && !emailMessage ? <p className="mt-2 text-sm text-brand-muted">{t.alreadySent}</p> : null}
           {emailMessage ? (
-            <p className={`mt-2 text-sm ${emailOk ? "text-[#0E9F5B]" : "text-brand-hold"}`} role="status">
+            <p className={`mt-2 text-sm ${emailOk ? "text-brand-orange" : "text-brand-hold"}`} role="status">
               {emailMessage}
             </p>
           ) : null}
@@ -204,7 +204,7 @@ export function VerificationReport({
               <Logo href="/today" />
               <h1 className="mt-3 font-display text-2xl font-semibold tracking-tight text-brand-ink sm:text-3xl">{t.reportViewTitle}</h1>
             </div>
-            <span className="rounded-brand-pill bg-[#E3F8EC] px-3 py-1 text-sm font-semibold text-[#0E9F5B]">{t.completed}</span>
+            <span className="rounded-brand-pill bg-[#FFF4C2] px-3 py-1 text-sm font-semibold text-brand-orange">{t.completed}</span>
           </div>
           <p className="mt-4 text-sm text-brand-muted">
             {t.batchRef} {doc.batchRef}
@@ -308,7 +308,7 @@ export function VerificationReport({
 function SummaryCard({ label, value, tone }: { label: string; value: number; tone?: "release" | "review" | "hold" }) {
   const styles =
     tone === "release"
-      ? "bg-[#E3F8EC] text-[#0E9F5B]"
+      ? "bg-[#FFF4C2] text-brand-orange"
       : tone === "review"
         ? "bg-[#E3EBFF] text-[#2457D6]"
         : tone === "hold"
@@ -373,7 +373,7 @@ function OrderBlock({
         </div>
       ) : null}
       {draft ? <div className="mt-3"><ReplyDrafts en={draft.en} swahili={draft.sw} /></div> : null}
-      {source?.sellerDecision ? <p className="mt-2 text-xs uppercase text-muted">{source.sellerDecision}</p> : null}
+      {source?.sellerDecision ? <p className="mt-2 text-xs uppercase text-brand-muted">{source.sellerDecision}</p> : null}
     </li>
   );
 }
@@ -381,7 +381,7 @@ function OrderBlock({
 function Findings({ grouped }: { grouped: Record<Verdict, ReportOrderLine[]> }) {
   const { t } = useI18n();
   const sections: { key: Verdict; title: string; className: string }[] = [
-    { key: "RELEASE", title: t.findingsRelease, className: "border-[#E3F8EC] bg-[#F4FBF6]" },
+    { key: "RELEASE", title: t.findingsRelease, className: "border-[#F0E2C8] bg-[#FFF8E4]" },
     { key: "REVIEW", title: t.findingsReview, className: "border-[#E3EBFF] bg-[#F5F8FF]" },
     { key: "HOLD", title: t.findingsHold, className: "border-[#FBE0E4] bg-[#FDF5F6]" },
   ];
@@ -393,13 +393,13 @@ function Findings({ grouped }: { grouped: Record<Verdict, ReportOrderLine[]> }) 
         if (items.length === 0) return null;
         return (
           <div key={section.key} className={cn("rounded-brand-card border px-4 py-4", section.className)}>
-            <h3 className="font-semibold">{section.title}</h3>
-            <ul className="mt-2 space-y-2 text-sm">
+            <h3 className="font-semibold text-brand-ink">{section.title}</h3>
+            <ul className="mt-2 space-y-2 text-sm text-brand-ink">
               {items.map((item) => (
                 <li key={item.orderId}>
                   <span className="font-medium">{item.customerName}</span>
                   {" — "}
-                  {item.explanation}
+                  <span className="text-brand-muted">{item.explanation}</span>
                 </li>
               ))}
             </ul>

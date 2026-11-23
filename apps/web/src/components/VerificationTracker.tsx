@@ -92,7 +92,7 @@ function toneLabel(tone: TrackerTone, t: Dictionary): string {
 }
 
 function titleClass(tone: TrackerTone): string {
-  if (tone === "complete") return "text-[#0E9F5B]";
+  if (tone === "complete") return "text-brand-orange";
   if (tone === "failed") return "text-brand-hold";
   if (tone === "active") return "text-brand-ink";
   return "text-brand-muted";
@@ -113,7 +113,7 @@ function StageMark({
     <span
       className={cn(
         "relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 transition-colors duration-300",
-        tone === "complete" && "border-[#0E9F5B] bg-[#E3F8EC] text-[#0E9F5B]",
+        tone === "complete" && "border-brand-orange bg-[#FFF4C2] text-brand-orange",
         tone === "active" && "ov-tracker-pulse border-brand-tangerine bg-[#FFF4C2] text-brand-orange",
         tone === "failed" && "border-brand-hold bg-[#FBE0E4] text-brand-hold",
         tone === "pending" && "border-[#F0E2C8] bg-brand-bg text-brand-muted",
@@ -142,7 +142,7 @@ function Connector({ filled, active }: { filled: boolean; active: boolean }) {
       <span className="relative h-full w-0.5 overflow-hidden bg-[#F0E2C8] md:h-0.5 md:w-full md:min-w-6">
         <span
           className={cn(
-            "absolute inset-0 origin-top bg-[#0E9F5B] transition-transform duration-700 ease-out md:origin-left",
+            "absolute inset-0 origin-top bg-brand-orange transition-transform duration-700 ease-out md:origin-left",
             filled ? "scale-y-100 md:scale-x-100" : active ? "scale-y-50 md:scale-x-50" : "scale-y-0 md:scale-x-0",
             !filled && "md:scale-y-100",
             filled && "md:scale-y-100",

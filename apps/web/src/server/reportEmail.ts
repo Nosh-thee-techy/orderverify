@@ -56,7 +56,7 @@ const copy = {
 } as const;
 
 const VERDICT_COLOR: Record<string, { text: string; bg: string }> = {
-  RELEASE: { text: "#0E9F5B", bg: "#E3F8EC" },
+  RELEASE: { text: "#C85A0C", bg: "#FFF4C2" },
   REVIEW: { text: "#2457D6", bg: "#E3EBFF" },
   HOLD: { text: "#B3122B", bg: "#FBE0E4" },
 };
@@ -116,7 +116,7 @@ export function renderReportEmail(
       <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
         <tr>
           ${summaryCell(t.total, String(doc.counts.total), "#2A1020", "#FFF8E4")}
-          ${summaryCell(t.release, String(doc.counts.release), "#0E9F5B", "#E3F8EC")}
+          ${summaryCell(t.release, String(doc.counts.release), "#C85A0C", "#FFF4C2")}
           ${summaryCell(t.review, String(doc.counts.review), "#2457D6", "#E3EBFF")}
           ${summaryCell(t.hold, String(doc.counts.hold), "#B3122B", "#FBE0E4")}
         </tr>

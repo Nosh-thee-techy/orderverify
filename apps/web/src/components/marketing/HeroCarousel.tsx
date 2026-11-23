@@ -11,7 +11,7 @@ import { useI18n } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { Button } from "./Button";
 import { Container } from "./Container";
-import { Logo } from "./Logo";
+
 
 const AUTO_MS = 6500;
 
@@ -104,10 +104,7 @@ export function HeroCarousel() {
 
         <Container width="wide" className="relative flex min-h-[max(32rem,calc(100svh-4.5rem))] items-end pb-28 pt-12 md:items-center md:pb-28 md:pt-16 min-[1440px]:pb-24">
           <div className="max-w-xl text-white md:max-w-2xl">
-            <Logo
-              href="/#top"
-              className="mb-5 [&_img]:[filter:drop-shadow(0_0_2px_#fff)_drop-shadow(0_1px_10px_rgba(255,255,255,0.85))]"
-            />
+
             <h1
               id={`${regionId}-title`}
               className="mt-3 font-display text-[2.15rem] font-semibold leading-[1.08] tracking-tight sm:text-display-lg lg:text-display-xl"

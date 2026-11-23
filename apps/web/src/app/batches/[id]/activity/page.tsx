@@ -108,8 +108,8 @@ export default function ActivityPage() {
       {status === "error" && !errorCode ? <ErrorState title={t.serviceDown} detail={message} /> : null}
 
       {snapshot.complete ? (
-        <div className="rounded-brand-card border border-[#E3F8EC] bg-[#E3F8EC] px-4 py-3 text-[#0E9F5B]" role="status">
-          <p className="font-semibold">{t.reportComplete}</p>
+        <div className="rounded-brand-card border border-[#F0E2C8] bg-[#FFF4C2] px-4 py-3 text-brand-ink" role="status">
+          <p className="font-semibold text-brand-orange">{t.reportComplete}</p>
           {payload ? null : (
             <a className="mt-1 inline-block text-sm underline" href="#verification-report">
               {t.viewReport}
@@ -129,7 +129,7 @@ export default function ActivityPage() {
 
       {status !== "done" ? (
         <div className="flex gap-2">
-          <Link href="/check" className="flex min-h-12 flex-1 items-center justify-center rounded-brand-control border border-[#F0E2C8] bg-white">
+          <Link href="/check" className="flex min-h-12 flex-1 items-center justify-center rounded-brand-control border border-[#F0E2C8] bg-white text-brand-ink">
             {t.cancel}
           </Link>
         </div>
