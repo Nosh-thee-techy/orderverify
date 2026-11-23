@@ -20,6 +20,8 @@ const buttonVariants = cva(
           "bg-brand-orange text-white shadow-brand-orange hover:-translate-y-px hover:bg-brand-orange-deep hover:shadow-brand active:translate-y-0",
         secondary:
           "border-[1.5px] border-brand-orange bg-transparent text-brand-orange hover:bg-brand-orange hover:text-white",
+        secondaryOnDark:
+          "border-[1.5px] border-white/85 bg-white/12 text-white hover:bg-white hover:text-brand-ink",
         dark: "bg-brand-ink text-white hover:-translate-y-px hover:bg-[#3d182c] active:translate-y-0",
         text: "rounded-md bg-transparent px-1 text-brand-orange hover:text-brand-tangerine hover:underline hover:decoration-2 hover:underline-offset-[6px]",
       },

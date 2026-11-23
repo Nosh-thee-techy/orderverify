@@ -2,18 +2,18 @@
  * apps/web/src/app/page.tsx
  * Public landing page. Later tasks fill the sections under this navigation.
  */
-import { MarketingPage, Navbar } from "@/components/marketing";
+import { HeroCarousel, MarketingPage, Navbar } from "@/components/marketing";
 
 /**
- * Public homepage: sticky marketing nav and named section targets.
- * Section bodies are intentionally empty until later tasks.
+ * Public homepage: sticky marketing nav, photographic hero, and named section targets.
+ * Remaining section bodies are intentionally empty until later tasks.
  */
 export default function LandingPage() {
   return (
     <MarketingPage>
       <Navbar />
       <main>
-        <h1 className="sr-only">OrderVerify — verify M-Pesa payments before you dispatch</h1>
+        <HeroCarousel />
         <section id="about" className="scroll-mt-24 min-h-[70vh]" aria-labelledby="about-heading">
           <h2 id="about-heading" className="sr-only">
             About OrderVerify

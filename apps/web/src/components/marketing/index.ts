@@ -4,6 +4,7 @@
  */
 export { Button, buttonVariants, type ButtonProps } from "./Button";
 export { Container } from "./Container";
+export { HeroCarousel } from "./HeroCarousel";
 export { Logo } from "./Logo";
 export { MarketingPage } from "./MarketingPage";
 export { Navbar } from "./Navbar";
