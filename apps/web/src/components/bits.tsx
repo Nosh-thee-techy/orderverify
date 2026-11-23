@@ -5,26 +5,45 @@
 "use client";
 
 import { useState } from "react";
-import { Check, CheckCircle2, Copy, ExternalLink, OctagonPause } from "lucide-react";
+import { AlertTriangle, Check, CheckCircle2, ClipboardList, Copy, ExternalLink, OctagonPause } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { explorerUrl, shortHash } from "@/lib/format";
 import { useI18n } from "@/i18n";
 
 /** A labelled number, always with words so colour is not the only cue. */
 export function StatChip({ label, value, tone }: { label: string; value: string | number; tone?: "hold" | "review" | "release" }) {
-  const toneClass =
+  const Icon = tone === "hold" ? AlertTriangle : tone === "release" ? CheckCircle2 : ClipboardList;
+  const wrap =
     tone === "hold"
-      ? "border-hold/15 bg-hold-bg"
+      ? "border-[#FBE0E4] bg-[#FDF2F5]"
       : tone === "review"
-        ? "border-review/15 bg-review-bg"
+        ? "border-brand-review-bg bg-brand-review-bg"
         : tone === "release"
-          ? "border-release/15 bg-release-bg"
-          : "border-line bg-surface";
-  const valueClass = tone === "hold" ? "text-hold" : tone === "review" ? "text-review" : tone === "release" ? "text-release" : "text-ink";
+          ? "border-[#E3F8EC] bg-[#F2FBF6]"
+          : "border-[#F8E9B8] bg-[#FFF8DE]";
+  const iconWrap =
+    tone === "hold"
+      ? "bg-white text-brand-hold"
+      : tone === "release"
+        ? "bg-white text-brand-release"
+        : "bg-[#FFE9A3] text-brand-orange";
+  const blob =
+    tone === "hold"
+      ? "bg-brand-raspberry/25"
+      : tone === "release"
+        ? "bg-brand-release/20"
+        : "bg-brand-yellow/70";
+  const valueClass = tone === "hold" ? "text-brand-hold" : tone === "release" ? "text-brand-release" : "text-brand-ink";
   return (
-    <div className={cn("flex h-full min-h-[7.25rem] flex-col justify-between rounded-card border px-5 py-4 shadow-sm", toneClass)}>
-      <div className="text-sm text-muted">{label}</div>
-      <div className={cn("tabular text-3xl font-semibold tracking-tight", valueClass)}>{value}</div>
+    <div className={cn("relative flex h-full min-h-[8.5rem] flex-col justify-between overflow-hidden rounded-brand-card border px-5 py-5 shadow-brand-sm", wrap)}>
+      <span className={cn("pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full blur-2xl", blob)} aria-hidden />
+      <div className="relative flex items-center gap-3">
+        <span className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full", iconWrap)} aria-hidden>
+          <Icon className="h-5 w-5" />
+        </span>
+        <div className="text-sm font-medium text-brand-muted">{label}</div>
+      </div>
+      <div className={cn("relative tabular text-4xl font-semibold tracking-tight", valueClass)}>{value}</div>
     </div>
   );
 }
@@ -34,18 +53,18 @@ export function HeroHoldCard({ holdKes, holdCount }: { holdKes: number; holdCoun
   const { t } = useI18n();
   if (holdCount === 0) {
     return (
-      <section className="flex items-start gap-4 rounded-card border border-release/15 bg-release-bg px-5 py-5 sm:px-6">
-        <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-release" aria-hidden>
+      <section className="flex items-start gap-4 rounded-brand-card border border-[#E3F8EC] bg-brand-release-bg px-5 py-5 sm:px-6">
+        <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-brand-release" aria-hidden>
           <CheckCircle2 className="h-5 w-5" />
         </span>
-        <p className="text-lg font-semibold leading-snug text-release">{t.nothingOnHold}</p>
+        <p className="text-lg font-semibold leading-snug text-brand-release">{t.nothingOnHold}</p>
       </section>
     );
   }
   return (
-    <section className="rounded-card border border-hold/15 bg-hold-bg px-5 py-5 text-hold sm:px-6">
+    <section className="rounded-brand-card border border-[#FBE0E4] bg-brand-hold-bg px-5 py-5 text-brand-hold sm:px-6">
       <div className="flex items-start gap-4">
-        <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-hold" aria-hidden>
+        <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-brand-hold" aria-hidden>
           <OctagonPause className="h-5 w-5" />
         </span>
         <div>
@@ -63,8 +82,8 @@ export function HeroHoldCard({ holdKes, holdCount }: { holdKes: number; holdCoun
 /** Friendly empty panel with one action. */
 export function EmptyState({ title, action }: { title: string; action?: React.ReactNode }) {
   return (
-    <div className="rounded-card border border-dashed border-line bg-surface px-5 py-10 text-center">
-      <p className="text-muted">{title}</p>
+    <div className="rounded-brand-card border border-dashed border-[#F0E2C8] bg-white px-5 py-10 text-center">
+      <p className="text-brand-muted">{title}</p>
       {action ? <div className="mt-4">{action}</div> : null}
     </div>
   );
@@ -89,7 +108,7 @@ export function Stepper({ step }: { step: number }) {
       <p className="text-sm text-muted">{t.step} {step} {t.of} 3</p>
       <div className="mt-3 grid grid-cols-3 gap-2" aria-hidden>
         {[1, 2, 3].map((item) => (
-          <div key={item} className={cn("h-2 rounded-full", item <= step ? "bg-primary" : "bg-line")} />
+          <div key={item} className={cn("h-2 rounded-full", item <= step ? "bg-brand-orange" : "bg-[#F0E2C8]")} />
         ))}
       </div>
     </div>
@@ -101,29 +120,101 @@ export function PasteArea({ label, value, onChange, hint }: { label: string; val
   return (
     <label className="block">
       <span className="mb-2 block font-medium">{label}</span>
-      <textarea value={value} onChange={(event) => onChange(event.target.value)} rows={8} className="w-full rounded-control border border-line bg-surface p-3 text-base shadow-sm outline-none transition-shadow focus:border-primary/40 focus:shadow-[0_0_0_3px_rgba(15,107,79,0.15)]" />
+      <textarea value={value} onChange={(event) => onChange(event.target.value)} rows={8} className="w-full rounded-brand-control border border-[#F0E2C8] bg-white p-3 text-base shadow-brand-sm outline-none transition-shadow focus:border-brand-orange/40 focus:shadow-[0_0_0_3px_rgba(200,90,12,0.15)]" />
       {hint ? <span className="mt-2 block text-sm text-muted">{hint}</span> : null}
     </label>
   );
 }
 
-/** File picker that reads text on the device before anything is uploaded. */
-export function FileDrop({ label, accept, onText }: { label: string; accept: string; onText: (text: string, name: string) => void }) {
+/**
+ * File picker for any document. Text files are read locally; everything else
+ * is sent to the server so PDF, Word, sheets, zips, and images can be read.
+ */
+export function FileDrop({
+  label,
+  accept,
+  onText,
+}: {
+  label: string;
+  accept?: string;
+  onText: (text: string, name: string) => void;
+}) {
+  const { t } = useI18n();
+  const [status, setStatus] = useState<"idle" | "reading" | "ok" | "error">("idle");
+  const [fileName, setFileName] = useState("");
+
   return (
-    <label className="flex min-h-12 cursor-pointer items-center justify-center rounded-control border border-dashed border-line bg-surface px-4 py-3 text-sm font-medium shadow-sm transition-colors hover:border-primary/40 hover:bg-paper">
-      {label}
-      <input
-        type="file"
-        accept={accept}
-        className="sr-only"
-        onChange={async (event) => {
-          const file = event.target.files?.[0];
-          if (!file) return;
-          onText(await file.text(), file.name);
-        }}
-      />
-    </label>
+    <div>
+      <label className="flex min-h-12 cursor-pointer items-center justify-center rounded-brand-control border border-dashed border-[#F0E2C8] bg-white px-4 py-3 text-sm font-medium shadow-brand-sm transition-colors hover:border-brand-orange/40 hover:bg-brand-bg">
+        {status === "reading" ? t.readingDocument : label}
+        <input
+          type="file"
+          accept={accept}
+          disabled={status === "reading"}
+          className="sr-only"
+          onChange={async (event) => {
+            const input = event.currentTarget;
+            const file = input.files?.[0];
+            if (!file) return;
+            setStatus("reading");
+            setFileName(file.name);
+            try {
+              const text = await readUploadedDocument(file);
+              if (!text.trim()) {
+                setStatus("error");
+                return;
+              }
+              onText(text, file.name);
+              setStatus("ok");
+            } catch {
+              setStatus("error");
+            } finally {
+              input.value = "";
+            }
+          }}
+        />
+      </label>
+      {status === "ok" ? (
+        <p className="mt-2 text-sm text-muted">
+          {t.documentLoaded}
+          {fileName ? ` · ${fileName}` : ""}
+        </p>
+      ) : null}
+      {status === "error" ? (
+        <p className="mt-2 text-sm text-hold" role="alert">
+          {t.documentFailed}
+        </p>
+      ) : null}
+    </div>
   );
+}
+
+/**
+ * Read a document as text. Plain files stay on the device; binary formats go
+ * through POST /api/documents/text.
+ *
+ * @param file - The file the seller picked
+ * @returns Extracted text
+ */
+async function readUploadedDocument(file: File): Promise<string> {
+  if (canReadLocally(file)) {
+    return file.text();
+  }
+  const body = new FormData();
+  body.append("file", file);
+  const response = await fetch("/api/documents/text", { method: "POST", body });
+  const payload = (await response.json()) as { text?: string; error?: string };
+  if (!response.ok || !payload.text) {
+    throw new Error(payload.error ?? "read_failed");
+  }
+  return payload.text;
+}
+
+function canReadLocally(file: File): boolean {
+  const name = file.name.toLowerCase();
+  const type = file.type.toLowerCase();
+  if (type.startsWith("text/") || type === "application/json") return true;
+  return /\.(txt|csv|tsv|json|md|log)$/.test(name);
 }
 
 /** Basic check versus a statement. The tooltip text is always visible underneath, not only on hover. */
@@ -141,7 +232,7 @@ export function TrustMeter({ strong }: { strong: boolean }) {
 export function CostBar({ orders, payments, costKes, leftKes, blocked }: { orders: number; payments: number; costKes: number; leftKes: number; blocked: boolean }) {
   const { t } = useI18n();
   return (
-    <div className={cn("rounded-card border px-4 py-3 text-sm", blocked ? "border-hold/20 bg-hold-bg text-hold" : "border-line bg-surface text-ink")}>
+    <div className={cn("rounded-brand-card border px-4 py-3 text-sm", blocked ? "border-hold/20 bg-hold-bg text-hold" : "border-[#F0E2C8] bg-white text-brand-ink")}>
       <p className="tabular">{orders} {t.ordersWord} · {payments} {t.messagesFound}</p>
       <p>KES {costKes} (0.01 USDC) · KES {leftKes} {t.leftThisWeek}</p>
       {blocked ? <p className="mt-1 font-medium">{t.capBlocked}</p> : null}
@@ -160,7 +251,7 @@ export function TxHashChip({ hash }: { hash: string | null }) {
       <code className="font-mono text-sm">{shortHash(hash)}</code>
       <button
         type="button"
-        className="inline-flex min-h-10 items-center gap-1 text-sm text-primary"
+        className="inline-flex min-h-10 items-center gap-1 text-sm text-brand-orange"
         onClick={() => {
           void navigator.clipboard.writeText(hash);
           setCopied(true);
@@ -170,7 +261,7 @@ export function TxHashChip({ hash }: { hash: string | null }) {
         {copied ? t.copied : t.copy}
       </button>
       {url ? (
-        <a className="inline-flex min-h-10 items-center gap-1 text-sm text-primary" href={url} target="_blank" rel="noreferrer">
+        <a className="inline-flex min-h-10 items-center gap-1 text-sm text-brand-orange" href={url} target="_blank" rel="noreferrer">
           <ExternalLink className="h-4 w-4" />
           Explorer
         </a>
@@ -190,7 +281,7 @@ export function CapMeter({ spentKes, capKes }: { spentKes: number; capKes: numbe
         <span className="text-muted">{t.usedThisWeek}</span>
       </div>
       <div className="h-3 overflow-hidden rounded-full bg-line" role="meter" aria-valuenow={Math.round(spentKes)} aria-valuemax={capKes}>
-        <div className="h-full bg-primary" style={{ width: `${ratio * 100}%` }} />
+        <div className="h-full bg-brand-orange" style={{ width: `${ratio * 100}%` }} />
       </div>
     </div>
   );
@@ -199,7 +290,7 @@ export function CapMeter({ spentKes, capKes }: { spentKes: number; capKes: numbe
 /** One row in the payment history. */
 export function PaymentRow({ when, amountUsd, amountKes, status, hash }: { when: string; amountUsd: number; amountKes: number; status: string; hash: string | null }) {
   return (
-    <div className="rounded-card border border-line bg-surface p-4 shadow-sm">
+    <div className="rounded-brand-card border border-[#F0E2C8] bg-white p-4 shadow-brand-sm">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm text-muted">{when}</p>
@@ -223,8 +314,8 @@ export function AgentStages({ stage }: { stage: 0 | 1 | 2 | 3 }) {
       {items.map((label, index) => {
         const done = stage > index;
         return (
-          <li key={label} className={cn("rounded-card border p-4 text-center text-sm", done ? "border-primary/20 bg-release-bg text-primary" : "border-line bg-surface text-muted")}>
-            <div className={cn("mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full text-base font-semibold", done ? "bg-primary text-white" : "bg-paper")}>{index + 1}</div>
+          <li key={label} className={cn("rounded-brand-card border p-4 text-center text-sm", done ? "border-brand-orange/20 bg-[#FFF6E0] text-brand-orange" : "border-[#F0E2C8] bg-white text-brand-muted")}>
+            <div className={cn("mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full text-base font-semibold", done ? "bg-brand-orange text-white" : "bg-brand-bg")}>{index + 1}</div>
             {label}
           </li>
         );
@@ -242,7 +333,7 @@ export function AgentTimeline({
   return (
     <ol className="mt-4 space-y-3">
       {events.map((event) => (
-        <li key={event.id} className="rounded-card border border-line bg-surface p-4 shadow-sm">
+        <li key={event.id} className="rounded-brand-card border border-[#F0E2C8] bg-white p-4 shadow-brand-sm">
           <p className="text-xs text-muted">{new Date(event.at).toLocaleTimeString()}</p>
           <p>{event.message}</p>
           {event.data?.amountUsd ? <p className="font-mono text-sm text-muted">{event.data.amountUsd} USDC · {event.data.network}</p> : null}
@@ -318,7 +409,7 @@ function Draft({ label, text, copyLabel, copiedLabel }: { label: string; text: s
     <div className="rounded-control border border-line bg-paper p-4">
       <div className="mb-1 flex items-center justify-between">
         <span className="text-xs font-medium text-muted">{label}</span>
-        <button type="button" className="min-h-10 text-sm text-primary" onClick={() => { void navigator.clipboard.writeText(text); setCopied(true); }}>
+        <button type="button" className="min-h-10 text-sm text-brand-orange" onClick={() => { void navigator.clipboard.writeText(text); setCopied(true); }}>
           {copied ? copiedLabel : copyLabel}
         </button>
       </div>
@@ -334,7 +425,7 @@ export function LimitsPanel() {
     ? "Ujumbe ulioandikwa vizuri na kodi inayoonekana halali hauwezi kukamatwa kwa maandishi pekee. Pakia taarifa ya M-Pesa ili tukague kama pesa iliingia kweli. Hatupigi simu Safaricom, na hatuwezi kuona salio lako moja kwa moja."
     : "A well-made message with a believable code cannot be caught from the text alone. Upload your M-Pesa statement for a stronger check. We do not call Safaricom, and we cannot see your balance ourselves.";
   return (
-    <details className="rounded-card border border-line bg-surface p-5 shadow-sm">
+    <details className="rounded-brand-card border border-[#F0E2C8] bg-white p-5 shadow-brand-sm">
       <summary className="cursor-pointer font-medium">{t.limitsTitle}</summary>
       <p className="mt-3 text-sm text-muted">{body}</p>
     </details>
@@ -346,7 +437,7 @@ export function ConfusionMatrix({ title, matrix }: { title: string; matrix: { ge
   const { t } = useI18n();
   const cols = ["RELEASE", "REVIEW", "HOLD"];
   return (
-    <div className="rounded-card border border-line bg-surface p-4">
+    <div className="rounded-brand-card border border-[#F0E2C8] bg-white p-4">
       <h3 className="font-medium">{title}</h3>
       <table className="mt-3 w-full text-left text-sm">
         <thead>

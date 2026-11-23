@@ -2,15 +2,18 @@
  * apps/web/src/app/layout.tsx
  * Root frame: fonts, language, and the shell. Bypass state is loaded on the client.
  *
- * DM Sans stays the product UI face. Fraunces is a display face used only by
- * landing-page headings so the marketing site feels warmer than the dashboard.
+ * Poppins is the product UI face. Fraunces stays the display face for headings.
  */
 import type { Metadata } from "next";
-import { DM_Sans, Fraunces, JetBrains_Mono } from "next/font/google";
+import { Fraunces, JetBrains_Mono, Poppins } from "next/font/google";
 import { Providers } from "@/components/Providers";
 import "./globals.css";
 
-const sans = DM_Sans({ subsets: ["latin"], variable: "--font-sans" });
+const sans = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sans",
+});
 const display = Fraunces({ subsets: ["latin"], variable: "--font-display" });
 const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 

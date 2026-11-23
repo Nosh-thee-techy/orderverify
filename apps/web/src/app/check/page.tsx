@@ -117,13 +117,12 @@ export default function CheckPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <Stepper step={step} />
-      <h1 className="text-3xl font-semibold tracking-tight">{step === 1 ? t.yourOrders : step === 2 ? t.yourPayments : t.review}</h1>
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-brand-ink">{step === 1 ? t.yourOrders : step === 2 ? t.yourPayments : t.review}</h1>
       {step === 1 ? (
         <>
           <PasteArea label={t.pasteChat} value={chat} onChange={setChat} hint={t.howToExport} />
-          <FileDrop label="Upload .txt" accept=".txt,text/plain" onText={(text) => setChat(text)} />
-          <p className="text-sm text-muted">{chat.trim() ? "Chat pasted" : ""}</p>
-          <button type="button" className="text-sm font-medium text-primary" onClick={() => void useSample()}>{t.useSample}</button>
+          <FileDrop label={t.uploadDocument} onText={(text) => setChat(text)} />
+          <button type="button" className="text-sm font-medium text-brand-orange" onClick={() => void useSample()}>{t.useSample}</button>
         </>
       ) : null}
       {step === 2 ? (
@@ -134,13 +133,18 @@ export default function CheckPage() {
           </div>
           <PasteArea label={t.pasteMpesa} value={payments} onChange={setPayments} />
           <p className="tabular text-sm">{messageCount} {t.messagesFound}</p>
-          <FileDrop label={t.uploadStatement} accept=".csv,text/csv" onText={(text) => setStatement(text)} />
-          {statement ? <p className="text-sm text-muted">Statement loaded</p> : null}
+          <FileDrop
+            label={t.uploadStatement}
+            onText={(text) => {
+              setStatement(text);
+              setIncludeStatement(true);
+            }}
+          />
           <TrustMeter strong={includeStatement && (statement.trim().length > 0 || availableStatement.length > 0)} />
-          {availableStatement ? (
+          {statement || availableStatement ? (
             <label className="flex min-h-12 items-center gap-3 text-sm">
               <input type="checkbox" checked={includeStatement} onChange={(event) => setIncludeStatement(event.target.checked)} />
-              Include the M-Pesa statement for a stronger check
+              {t.includeStatement}
             </label>
           ) : null}
         </>
@@ -150,23 +154,23 @@ export default function CheckPage() {
           {mode === "basic" ? <p className="text-sm text-muted">{t.basicExtraction}</p> : null}
           <ul className="space-y-3">
             {orders.map((order, index) => (
-              <li key={`${order.customerName}-${index}`} className="rounded-card border border-line bg-surface p-4 shadow-sm">
+              <li key={`${order.customerName}-${index}`} className="rounded-brand-card border border-[#F0E2C8] bg-white p-4 shadow-brand-sm">
                 <label className="block text-sm">
                   {t.customer}
-                  <input className="mt-1 w-full min-h-12 rounded-control border border-line bg-paper px-3" value={order.customerName} onChange={(event) => update(index, { customerName: event.target.value })} />
+                      <input className="mt-1 w-full min-h-12 rounded-brand-control border border-[#F0E2C8] bg-brand-bg px-3" value={order.customerName} onChange={(event) => update(index, { customerName: event.target.value })} />
                 </label>
                 <label className="mt-2 block text-sm">
                   {t.items}
-                  <input className="mt-1 w-full min-h-12 rounded-control border border-line bg-paper px-3" value={order.items.map((item) => item.name).join(", ")} onChange={(event) => update(index, { items: [{ name: event.target.value, qty: 1, unitPriceKes: order.expectedAmountKes }] })} />
+                  <input className="mt-1 w-full min-h-12 rounded-brand-control border border-[#F0E2C8] bg-brand-bg px-3" value={order.items.map((item) => item.name).join(", ")} onChange={(event) => update(index, { items: [{ name: event.target.value, qty: 1, unitPriceKes: order.expectedAmountKes }] })} />
                 </label>
                 <label className="mt-2 block text-sm">
                   {t.amount}
-                  <input className="mt-1 w-full min-h-12 rounded-control border border-line bg-paper px-3 tabular" inputMode="numeric" value={order.expectedAmountKes ?? ""} onChange={(event) => update(index, { expectedAmountKes: event.target.value === "" ? null : Number(event.target.value) })} />
+                  <input className="mt-1 w-full min-h-12 rounded-brand-control border border-[#F0E2C8] bg-brand-bg px-3 tabular" inputMode="numeric" value={order.expectedAmountKes ?? ""} onChange={(event) => update(index, { expectedAmountKes: event.target.value === "" ? null : Number(event.target.value) })} />
                 </label>
                 {order.expectedAmountKes === null ? <p className="mt-2 text-sm text-review">{t.addAmount}</p> : null}
                 <label className="mt-2 block text-sm">
                   {t.code}
-                  <input className="mt-1 w-full min-h-12 rounded-control border border-line bg-paper px-3 font-mono" value={order.claimedCode ?? ""} onChange={(event) => update(index, { claimedCode: event.target.value || null })} />
+                  <input className="mt-1 w-full min-h-12 rounded-brand-control border border-[#F0E2C8] bg-brand-bg px-3 font-mono" value={order.claimedCode ?? ""} onChange={(event) => update(index, { claimedCode: event.target.value || null })} />
                 </label>
               </li>
             ))}
@@ -176,14 +180,14 @@ export default function CheckPage() {
       ) : null}
       {error ? <p className="text-sm text-hold" role="alert">{error}</p> : null}
       <div className="flex gap-2">
-        {step > 1 ? <button type="button" className="min-h-12 flex-1 rounded-control border border-line bg-surface shadow-sm" onClick={() => setStep(step - 1)}>{t.back}</button> : null}
-        {step === 1 ? <button type="button" disabled={busy || chat.trim().length < 2} className="min-h-12 flex-1 rounded-control bg-primary font-semibold text-white shadow-sm transition-colors hover:bg-[#0c5a42] disabled:opacity-50" onClick={() => void extract()}>{busy ? "…" : t.next}</button> : null}
-        {step === 2 ? <button type="button" className="min-h-12 flex-1 rounded-control bg-primary font-semibold text-white shadow-sm transition-colors hover:bg-[#0c5a42]" onClick={() => setStep(3)}>{t.next}</button> : null}
+        {step > 1 ? <button type="button" className="min-h-12 flex-1 rounded-brand-control border border-[#F0E2C8] bg-white shadow-brand-sm" onClick={() => setStep(step - 1)}>{t.back}</button> : null}
+        {step === 1 ? <button type="button" disabled={busy || chat.trim().length < 2} className="min-h-12 flex-1 rounded-brand-control bg-brand-orange font-semibold text-white shadow-brand-orange transition-colors hover:bg-brand-orange-deep disabled:opacity-50" onClick={() => void extract()}>{busy ? "…" : t.next}</button> : null}
+        {step === 2 ? <button type="button" className="min-h-12 flex-1 rounded-brand-control bg-brand-orange font-semibold text-white shadow-brand-orange transition-colors hover:bg-brand-orange-deep" onClick={() => setStep(3)}>{t.next}</button> : null}
         {step === 3 ? (
           blocked ? (
-            <Link href="/wallet" className="flex min-h-12 flex-1 items-center justify-center rounded-control bg-hold font-semibold text-white">{t.raiseCap}</Link>
+            <Link href="/wallet" className="flex min-h-12 flex-1 items-center justify-center rounded-brand-control bg-hold font-semibold text-white">{t.raiseCap}</Link>
           ) : (
-            <button type="button" disabled={busy || orders.length === 0} className="min-h-12 flex-1 rounded-control bg-primary font-semibold text-white shadow-sm transition-colors hover:bg-[#0c5a42] disabled:opacity-50" onClick={() => void run()}>{busy ? "…" : t.runCheck}</button>
+            <button type="button" disabled={busy || orders.length === 0} className="min-h-12 flex-1 rounded-brand-control bg-brand-orange font-semibold text-white shadow-brand-orange transition-colors hover:bg-brand-orange-deep disabled:opacity-50" onClick={() => void run()}>{busy ? "…" : t.runCheck}</button>
           )
         ) : null}
       </div>

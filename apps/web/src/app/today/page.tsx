@@ -1,13 +1,15 @@
 /**
  * apps/web/src/app/today/page.tsx
- * Today: what is on hold, three counts, and a way into the next check.
- * Lives at /today so the public landing page can occupy /.
+ * Today: greeting banner, three counts, and a way into the next check.
+ * Lives at /today so the public landing page can occupy /. Same /api/home data
+ * and the same /check and batch destinations.
  */
 "use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { EmptyState, HeroHoldCard, StatChip } from "@/components/bits";
+import { ArrowRight, History, Search } from "lucide-react";
+import { EmptyState, StatChip } from "@/components/bits";
 import { useI18n } from "@/i18n";
 import { formatKes, formatWhen } from "@/lib/format";
 
@@ -24,77 +26,184 @@ interface Home {
 export default function TodayPage() {
   const { t, lang } = useI18n();
   const [home, setHome] = useState<Home | null>(null);
-  const [error, setError] = useState("");
   useEffect(() => {
     void fetch("/api/home")
       .then(async (response) => {
-        if (!response.ok) throw new Error("home");
+        if (!response.ok) return;
         setHome((await response.json()) as Home);
       })
-      .catch(() => setError("The demo database is not ready yet."));
+      .catch(() => undefined);
   }, []);
   const date = new Intl.DateTimeFormat(lang === "sw" ? "sw-KE" : "en-KE", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
   return (
-    <div className="mx-auto max-w-5xl space-y-8">
-      <div>
-        <p className="text-sm font-medium text-muted">{date}</p>
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight">
-          {t.greeting}, {home?.displayName ?? "Akinyi"}
-        </h1>
-        <p className="mt-2 text-muted">{t.tagline}</p>
+    <div className="space-y-8">
+      <GreetingBanner date={date} name={home?.displayName ?? "Akinyi"} tagline={t.tagline} greeting={t.greeting} />
+      <div className="mx-auto max-w-5xl space-y-8">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <StatChip label={t.toCheck} value={home?.toCheck ?? 0} />
+          <StatChip label={t.onHold} value={home?.holdCount ?? 0} tone="hold" />
+          <StatChip label={t.releasedToday} value={home?.releasedToday ?? 0} tone="release" />
+        </div>
+        <Link
+          href="/check"
+          className="flex min-h-14 w-full items-center justify-center gap-2 rounded-brand-control bg-brand-orange px-4 text-base font-semibold text-white shadow-brand-orange transition-colors duration-200 ease-brand hover:bg-brand-orange-deep"
+        >
+          <Search className="h-5 w-5" aria-hidden />
+          {t.checkMyOrders}
+          <ArrowRight className="h-5 w-5" aria-hidden />
+        </Link>
+        <section className="overflow-hidden rounded-brand-card border border-[#F0E2C8] bg-white shadow-brand-sm">
+          <div className="flex items-center gap-2 border-b border-[#F0E2C8] px-5 py-4">
+            <History className="h-5 w-5 text-brand-orange" aria-hidden />
+            <h2 className="font-display text-lg font-semibold text-brand-ink">{t.recent}</h2>
+          </div>
+          {home && home.batches.length === 0 ? (
+            <div className="p-5">
+              <EmptyState title={t.emptyToday} action={<Link className="font-medium text-brand-orange" href="/check">{t.trySample}</Link>} />
+            </div>
+          ) : (
+            <RecentChecks batches={home?.batches ?? []} lang={lang} />
+          )}
+        </section>
       </div>
-      {error ? <EmptyState title={error} /> : null}
-      <HeroHoldCard holdKes={home?.holdKes ?? 0} holdCount={home?.holdCount ?? 0} />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatChip label={t.toCheck} value={home?.toCheck ?? 0} />
-        <StatChip label={t.onHold} value={home?.holdCount ?? 0} tone="hold" />
-        <StatChip label={t.releasedToday} value={home?.releasedToday ?? 0} tone="release" />
-      </div>
-      <Link
-        href="/check"
-        className="flex min-h-12 w-full items-center justify-center rounded-control bg-primary px-4 text-base font-semibold text-white shadow-sm transition-colors hover:bg-[#0c5a42]"
-      >
-        {t.checkMyOrders}
-      </Link>
-      <section>
-        <h2 className="mb-3 text-sm font-medium text-muted">{t.recent}</h2>
-        {home && home.batches.length === 0 ? (
-          <EmptyState title={t.emptyToday} action={<Link className="font-medium text-primary" href="/check">{t.trySample}</Link>} />
-        ) : (
-          <ul className="space-y-3">
-            {home?.batches.map((batch) => (
-              <li key={batch.id}>
-                <Link
-                  href={batch.status === "done" ? `/batches/${batch.id}` : `/batches/${batch.id}/activity`}
-                  className="block rounded-card border border-line bg-surface p-4 shadow-sm transition-shadow hover:shadow-card"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm text-muted">{formatWhen(batch.createdAt, lang)}</span>
-                    <span className="rounded-full bg-paper px-2.5 py-1 text-xs font-medium uppercase tracking-wide text-muted">
-                      {batch.evidenceTier === "STATEMENT_VERIFIED" ? "Statement" : "Text"}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-sm font-medium">
-                    {batch.counts.hold} hold · {batch.counts.review} check · {batch.counts.release} release
-                  </p>
-                  <div className="mt-3 flex h-2 overflow-hidden rounded-full bg-line">
-                    <span className="bg-hold" style={{ width: `${share(batch.counts.hold, batch.counts)}%` }} />
-                    <span className="bg-review" style={{ width: `${share(batch.counts.review, batch.counts)}%` }} />
-                    <span className="bg-release" style={{ width: `${share(batch.counts.release, batch.counts)}%` }} />
-                  </div>
-                  {batch.counts.hold ? <p className="mt-3 text-sm font-medium text-hold">{formatKes(batch.moneyHeldKes)} held</p> : null}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
     </div>
   );
 }
 
-function share(part: number, counts: { hold: number; review: number; release: number }): number {
-  const total = counts.hold + counts.review + counts.release;
-  if (!total) return 0;
-  return (part / total) * 100;
+/**
+ * Greeting on a full-width banner. Colours match the sunset shapes that sat
+ * beside the seller photo; the photo now lives on the left of the banner.
+ */
+function GreetingBanner({
+  date,
+  name,
+  greeting,
+  tagline,
+}: {
+  date: string;
+  name: string;
+  greeting: string;
+  tagline: string;
+}) {
+  return (
+    <div className="my-2 w-full">
+      <div className="relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-[#FFD416] via-[#E4701D] to-[#E72369] p-4 shadow-brand sm:p-6">
+        <span className="pointer-events-none absolute -right-8 -top-10 h-36 w-36 rounded-full bg-brand-yellow/70" aria-hidden />
+        <span className="pointer-events-none absolute -bottom-12 right-16 h-28 w-28 rounded-full bg-white/25" aria-hidden />
+        <span className="pointer-events-none absolute bottom-[-2rem] left-40 h-24 w-24 rounded-full bg-brand-raspberry/40" aria-hidden />
+        <div className="relative flex items-center gap-4 sm:gap-6">
+          <img
+            src="/images/about/orders.webp"
+            alt=""
+            className="h-28 w-28 shrink-0 rounded-[1.25rem] object-cover shadow-brand sm:h-36 sm:w-36"
+          />
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-white/85">{date}</p>
+            <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              {greeting}, {name}
+            </h1>
+            <p className="mt-2 max-w-md text-sm text-white/90 sm:text-base">{tagline}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Recent batches as a table on desktop and stacked rows on small screens.
+ * Columns are only fields already returned by GET /api/home.
+ */
+function RecentChecks({
+  batches,
+  lang,
+}: {
+  batches: Home["batches"];
+  lang: "en" | "sw";
+}) {
+  const { t } = useI18n();
+  if (batches.length === 0) return null;
+  return (
+    <>
+      <ul className="divide-y divide-[#F0E2C8] sm:hidden">
+        {batches.map((batch) => (
+          <li key={batch.id}>
+            <Link href={batchHref(batch)} className="block px-5 py-4 transition-colors hover:bg-[#FFFBF0]">
+              <p className="text-sm text-brand-muted">{formatWhen(batch.createdAt, lang)}</p>
+              <p className="mt-1 text-sm font-medium text-brand-ink">
+                {batch.evidenceTier === "STATEMENT_VERIFIED" ? t.withStatement : t.textOnly}
+              </p>
+              <div className="mt-2">
+                <CountBadges counts={batch.counts} />
+              </div>
+              {batch.counts.hold ? (
+                <p className="mt-2 text-sm font-medium text-brand-hold">{formatKes(batch.moneyHeldKes)}</p>
+              ) : null}
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <div className="hidden overflow-x-auto sm:block">
+        <table className="w-full min-w-[32rem] text-left text-sm">
+          <thead>
+            <tr className="text-brand-muted">
+              <th className="px-5 py-3 font-medium">{t.when}</th>
+              <th className="px-5 py-3 font-medium">{t.evidence}</th>
+              <th className="px-5 py-3 font-medium">{t.results}</th>
+              <th className="px-5 py-3 font-medium">{t.held}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {batches.map((batch) => (
+              <tr key={batch.id} className="border-t border-[#F0E2C8]">
+                <td className="px-5 py-4">
+                  <Link href={batchHref(batch)} className="font-medium text-brand-ink hover:text-brand-orange">
+                    {formatWhen(batch.createdAt, lang)}
+                  </Link>
+                </td>
+                <td className="px-5 py-4 text-brand-muted">
+                  {batch.evidenceTier === "STATEMENT_VERIFIED" ? t.withStatement : t.textOnly}
+                </td>
+                <td className="px-5 py-4">
+                  <CountBadges counts={batch.counts} />
+                </td>
+                <td className="tabular px-5 py-4 text-brand-ink">
+                  {batch.counts.hold ? formatKes(batch.moneyHeldKes) : "—"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
+/** Existing batch destinations — done goes to results, otherwise the activity stream. */
+function batchHref(batch: Home["batches"][number]): string {
+  return batch.status === "done" ? `/batches/${batch.id}` : `/batches/${batch.id}/activity`;
+}
+
+/** Hold / Review / Release counts as the spec's rounded badges. Skip zeros. */
+function CountBadges({ counts }: { counts: { hold: number; review: number; release: number } }) {
+  const { t } = useI18n();
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {counts.hold > 0 ? (
+        <span className="rounded-full bg-brand-hold-bg px-2.5 py-0.5 text-xs font-medium text-brand-hold">
+          {counts.hold} {t.holdFilter}
+        </span>
+      ) : null}
+      {counts.review > 0 ? (
+        <span className="rounded-full bg-brand-review-bg px-2.5 py-0.5 text-xs font-medium text-brand-review">
+          {counts.review} {t.reviewFilter}
+        </span>
+      ) : null}
+      {counts.release > 0 ? (
+        <span className="rounded-full bg-brand-release-bg px-2.5 py-0.5 text-xs font-medium text-brand-release">
+          {counts.release} {t.releaseFilter}
+        </span>
+      ) : null}
+    </div>
+  );
 }

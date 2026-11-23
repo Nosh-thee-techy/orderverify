@@ -23,8 +23,8 @@ export default function EvalsPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-8">
       <header>
-        <h1 className="text-3xl font-semibold tracking-tight">{t.evalsTitle}</h1>
-        <p className="mt-2 max-w-xl text-muted">{results.note || t.evalsNote}</p>
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-brand-ink">{t.evalsTitle}</h1>
+        <p className="mt-2 max-w-xl text-brand-muted">{results.note || t.evalsNote}</p>
       </header>
       <div className="grid gap-3 sm:grid-cols-2">
         <RateCard title={t.textOnly} catchRate={textOnly.catchRate} falseFlag={textOnly.falseFlagRate} />
@@ -32,7 +32,7 @@ export default function EvalsPage() {
       </div>
       <ConfusionMatrix title={t.textOnly} matrix={textOnly.matrix} />
       <ConfusionMatrix title={t.withStatement} matrix={statement.matrix} />
-      <div className="overflow-x-auto rounded-card border border-line bg-surface">
+      <div className="overflow-x-auto rounded-brand-card border border-[#F0E2C8] bg-white">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="text-muted">
@@ -63,7 +63,7 @@ export default function EvalsPage() {
 function RateCard({ title, catchRate, falseFlag }: { title: string; catchRate: number; falseFlag: number }) {
   const { t } = useI18n();
   return (
-    <section className="rounded-card bg-ink p-5 text-white">
+    <section className="rounded-brand-card bg-brand-ink p-5 text-white">
       <p className="text-sm text-white/70">{title}</p>
       <p className="tabular mt-2 text-4xl font-semibold">{Math.round(catchRate * 100)}%</p>
       <p className="text-sm">{t.catchRate}</p>

@@ -16,17 +16,17 @@ export default function SettingsPage() {
   const [done, setDone] = useState(false);
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-3xl font-semibold tracking-tight">{t.settingsTitle}</h1>
-      <fieldset className="rounded-card border border-line bg-surface p-5 shadow-sm">
+      <h1 className="font-display text-3xl font-semibold tracking-tight text-brand-ink">{t.settingsTitle}</h1>
+      <fieldset className="rounded-brand-card border border-[#F0E2C8] bg-white p-5 shadow-brand-sm">
         <legend className="font-medium">{t.language}</legend>
         <div className="mt-3 flex gap-2">
-          <button type="button" className={`min-h-12 flex-1 rounded-control ${lang === "en" ? "bg-primary text-white" : "border border-line"}`} onClick={() => setLang("en")}>{t.english}</button>
-          <button type="button" className={`min-h-12 flex-1 rounded-control ${lang === "sw" ? "bg-primary text-white" : "border border-line"}`} onClick={() => setLang("sw")}>{t.kiswahili}</button>
+          <button type="button" className={`min-h-12 flex-1 rounded-brand-control ${lang === "en" ? "bg-brand-orange text-white" : "border border-[#F0E2C8]"}`} onClick={() => setLang("en")}>{t.english}</button>
+          <button type="button" className={`min-h-12 flex-1 rounded-brand-control ${lang === "sw" ? "bg-brand-orange text-white" : "border border-[#F0E2C8]"}`} onClick={() => setLang("sw")}>{t.kiswahili}</button>
         </div>
       </fieldset>
-      <p className="text-sm text-muted">{t.retention}</p>
+      <p className="text-sm text-brand-muted">{t.retention}</p>
       <LimitsPanel />
-      <Link href="/evals" className="block rounded-card border border-line bg-surface p-5 font-medium shadow-sm transition-shadow hover:shadow-card">{t.evalsTitle}</Link>
+      <Link href="/evals" className="block rounded-brand-card border border-[#F0E2C8] bg-white p-5 font-medium shadow-brand-sm transition-shadow hover:shadow-brand">{t.evalsTitle}</Link>
       {!confirm ? (
         <button type="button" className="min-h-12 w-full rounded-control bg-hold text-white" onClick={() => setConfirm(true)}>{t.deleteData}</button>
       ) : (
@@ -44,7 +44,7 @@ export default function SettingsPage() {
             >
               {t.deleteData}
             </button>
-            <button type="button" className="min-h-12 flex-1 rounded-control border border-line bg-surface text-ink" onClick={() => setConfirm(false)}>{t.cancel}</button>
+            <button type="button" className="min-h-12 flex-1 rounded-brand-control border border-[#F0E2C8] bg-white text-brand-ink" onClick={() => setConfirm(false)}>{t.cancel}</button>
           </div>
         </div>
       )}

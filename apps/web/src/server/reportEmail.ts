@@ -106,7 +106,7 @@ export function renderReportEmail(
       : `<h3 style="margin:24px 0 8px;font-size:16px">${escapeHtml(t.unmatched)}</h3>
          <p>${doc.unmatchedPayments.map((item) => escapeHtml(item.code ?? item.paymentId)).join(", ")}</p>`;
 
-  return `<div style="font-family:DM Sans,system-ui,sans-serif;color:#2A1020;background:#FFFBF0;padding:24px">
+  return `<div style="font-family:Poppins,system-ui,sans-serif;color:#2A1020;background:#FFFBF0;padding:24px">
     <div style="max-width:720px;margin:0 auto;background:#FFFFFF;border:1px solid #F0E2C8;border-radius:16px;padding:28px">
       <p style="margin:0 0 4px;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;color:#E4701D">OrderVerify</p>
       <h1 style="margin:0 0 8px;font-size:22px">${escapeHtml(t.title)}</h1>

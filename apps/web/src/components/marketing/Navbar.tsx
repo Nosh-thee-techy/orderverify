@@ -1,16 +1,15 @@
 /**
  * apps/web/src/components/marketing/Navbar.tsx
  * Sticky public navigation. In-page links scroll to landing sections.
- * Start Verifying enters the product. There is no Sign In control here.
+ * The logo is the brand mark only. There is no Start Verifying control here.
  */
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { ArrowRight, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { LanguageMenu } from "@/components/LanguageMenu";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/cn";
-import { Button } from "./Button";
 import { Container } from "./Container";
 import { Logo } from "./Logo";
 
@@ -54,7 +53,6 @@ export function Navbar() {
         setOpen(false);
         return;
       }
-      // Keep Tab inside the drawer so keyboard users cannot reach the page behind it.
       if (event.key !== "Tab" || !drawerRef.current) return;
       const focusable = [...drawerRef.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled])")].filter(
         (el) => !el.hasAttribute("disabled") && el.tabIndex !== -1,
@@ -111,10 +109,6 @@ export function Navbar() {
 
         <div className="hidden items-center gap-4 lg:flex">
           <LanguageMenu variant="nav" />
-          <Button href="/check">
-            {t.landing.nav.startVerifying}
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </Button>
         </div>
 
         <button
@@ -126,7 +120,7 @@ export function Navbar() {
           )}
           aria-expanded={open}
           aria-controls={menuId}
-            aria-label={t.landing.openMenu}
+          aria-label={t.landing.openMenu}
           onClick={() => setOpen(true)}
         >
           <Menu className="h-6 w-6" aria-hidden />
@@ -178,12 +172,6 @@ export function Navbar() {
               </ul>
               <div className="mt-4">
                 <LanguageMenu variant="nav" />
-              </div>
-              <div className="mt-auto pt-6">
-                <Button href="/check" className="w-full">
-                  {t.landing.nav.startVerifying}
-                  <ArrowRight className="h-4 w-4" aria-hidden />
-                </Button>
               </div>
             </nav>
           </div>

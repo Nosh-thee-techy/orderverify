@@ -5,7 +5,7 @@
 import { desc, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { parseMpesaMessage, parseStatementCsv, redactPhones, splitMpesaMessages } from "@orderverify/engine";
+import { parseMpesaMessage, parseStatement, redactPhones, splitMpesaMessages } from "@orderverify/engine";
 import { sellerOrLimit, readJson } from "@/server/api";
 import { getDb } from "@/server/db/client";
 import { batches, orders, paymentEvidence, reports, statementRows } from "@/server/db/schema";
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(body.json);
   if (!parsed.success) return NextResponse.json({ error: "invalid_body" }, { status: 400 });
   const messages = parsed.data.payments ?? splitMpesaMessages(parsed.data.paymentsText).map((rawText) => ({ rawText, senderLabel: null as string | null }));
-  const statement = parsed.data.statementCsv ? parseStatementCsv(parsed.data.statementCsv) : [];
+  const statement = parsed.data.statementCsv ? parseStatement(parsed.data.statementCsv) : [];
   const tier = statement.length > 0 ? "STATEMENT_VERIFIED" : "TEXT_ONLY";
   const db = getDb();
   const [batch] = await db

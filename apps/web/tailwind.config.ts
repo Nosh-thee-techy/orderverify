@@ -2,11 +2,12 @@
  * apps/web/tailwind.config.ts
  * Design tokens from the product spec.
  *
- * Dashboard tokens (paper, primary green, hold/review/release) stay as they are so
- * the authenticated product keeps its working identity.
+ * Product tokens (paper, primary, hold/review/release) remain for leftover
+ * component classes. Authenticated screens now style themselves with `brand.*`
+ * so the dashboard matches the public OrderVerify identity.
  *
- * Brand tokens (`brand.*`) are the public landing-page palette. Landing components
- * must use these names so the two surfaces can coexist without leaking colours.
+ * Brand tokens (`brand.*`) are the sunset palette. Landing and dashboard
+ * chrome both use these names.
  */
 import type { Config } from "tailwindcss";
 
@@ -48,7 +49,7 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "DM Sans", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "Poppins", "ui-sans-serif", "system-ui", "sans-serif"],
         display: ["var(--font-display)", "Fraunces", "Georgia", "serif"],
         mono: ["var(--font-mono)", "JetBrains Mono", "ui-monospace", "monospace"],
       },

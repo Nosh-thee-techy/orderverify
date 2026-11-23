@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { Download, Mail, X } from "lucide-react";
 import type { BatchReport, Verdict } from "@orderverify/engine";
 import { CheckRow, LimitsPanel, ReplyDrafts } from "@/components/bits";
+import { Logo } from "@/components/marketing/Logo";
 import { VerdictBadge } from "@/components/VerdictBadge";
 import { useI18n } from "@/i18n";
 import { formatKes, formatWhen } from "@/lib/format";
@@ -199,16 +200,9 @@ export function VerificationReport({
       <article id="verification-report" className="overflow-hidden rounded-[1.5rem] border border-[#F0E2C8] bg-white shadow-brand-lg">
         <header className="border-b border-[#F0E2C8] bg-[#FFF8E4] px-5 py-6 sm:px-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 items-center justify-center rounded-[0.7rem] bg-brand-sunset text-white shadow-brand-sm" aria-hidden>
-                <svg viewBox="0 0 32 32" className="h-5 w-5" fill="none">
-                  <path d="M8.5 16.6 13.4 21.5 23.5 10.8" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-              <div>
-                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-brand-tangerine">OrderVerify</p>
-                <h1 className="font-display text-2xl font-semibold tracking-tight text-brand-ink sm:text-3xl">{t.reportViewTitle}</h1>
-              </div>
+            <div className="min-w-0">
+              <Logo href="/today" />
+              <h1 className="mt-3 font-display text-2xl font-semibold tracking-tight text-brand-ink sm:text-3xl">{t.reportViewTitle}</h1>
             </div>
             <span className="rounded-brand-pill bg-[#E3F8EC] px-3 py-1 text-sm font-semibold text-[#0E9F5B]">{t.completed}</span>
           </div>

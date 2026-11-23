@@ -3,7 +3,7 @@
  * WhatsApp exports and statement CSVs are untrusted files from the seller's phone.
  */
 import { describe, expect, it } from "vitest";
-import { parseStatementCsv } from "./parseStatement.js";
+import { parseStatement, parseStatementCsv } from "./parseStatement.js";
 import { parseWhatsAppExport } from "./parseWhatsApp.js";
 import { redactPhones } from "./redact.js";
 import { weekStartNairobi } from "./dates.js";
@@ -24,6 +24,20 @@ describe("parseWhatsAppExport", () => {
     expect(messages[0]?.text).toContain("call me");
     expect(messages[1]?.from).toBe("Mary");
     expect(messages[1]?.at.toISOString()).toBe("2026-11-12T11:04:11.000Z");
+  });
+});
+
+describe("parseStatement", () => {
+  it("reads receipt rows from a PDF-style text dump", () => {
+    const text = [
+      "M-PESA STATEMENT",
+      "UKC1234567 12/11/2026 14:02:00 Customer Payment from MARY Completed 2,500.00 0.00 8,000.00",
+      "ABC9990001 12/11/2026 15:10:00 Pay Bill Completed 0.00 200.00 7,800.00",
+    ].join("\n");
+    const rows = parseStatement(text);
+    expect(rows).toHaveLength(2);
+    expect(rows[0]?.receiptNo).toBe("UKC1234567");
+    expect(rows[0]?.paidInKes).toBe(2500);
   });
 });
 

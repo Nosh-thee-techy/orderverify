@@ -45,7 +45,7 @@ export default function BrandGalleryPage() {
         <SectionHeading
           eyebrow="Typography"
           title="A smarter way to verify M-Pesa payments."
-          description="Fraunces for headlines. DM Sans for interface copy. Kickers stay small, tracked, and tangerine."
+          description="Fraunces for headlines. Poppins for interface copy. Kickers stay small, tracked, and tangerine."
         />
         <div className="mt-10 grid gap-8 lg:grid-cols-2">
           <div className="rounded-brand-card border border-[#F3E6D4] bg-brand-bg p-6 shadow-brand-sm">

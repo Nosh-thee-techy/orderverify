@@ -6,6 +6,19 @@
 import { StatementRow } from "./types.js";
 
 /**
+ * Parse a statement from CSV, a spreadsheet dump, or plain text pulled from a PDF.
+ * CSV is tried first; if there is no receipt column, we scan for M-Pesa codes.
+ *
+ * @param text - Untrusted statement contents
+ * @returns Credit and debit rows. Unreadable rows are skipped, never thrown.
+ */
+export function parseStatement(text: string): StatementRow[] {
+  const csv = parseStatementCsv(text);
+  if (csv.length > 0) return csv;
+  return parseStatementPlain(text);
+}
+
+/**
  * Parse a statement CSV into rows.
  * @param csv - Raw CSV text, including the header row
  * @returns Credit and debit rows. Unreadable rows are skipped, never thrown.
@@ -102,6 +115,44 @@ function parseCompletion(raw: string): Date | null {
 
 function splitCsvLines(csv: string): string[] {
   return csv.replace(/\r\n/g, "\n").replace(/^\uFEFF/, "").split("\n");
+}
+
+const RECEIPT = /\b([A-Z][A-Z0-9]{9})\b/g;
+const MONEY = /(\d{1,3}(?:,\d{3})*(?:\.\d{2})|\d+\.\d{2})/g;
+
+/**
+ * Read receipt rows from statement text that is not a CSV, such as a PDF extract.
+ *
+ * @param text - Untrusted plain text
+ * @returns Rows keyed by receipt number
+ */
+export function parseStatementPlain(text: string): StatementRow[] {
+  const rows: StatementRow[] = [];
+  const seen = new Set<string>();
+  for (const line of splitCsvLines(text)) {
+    RECEIPT.lastIndex = 0;
+    const codeMatch = RECEIPT.exec(line.toUpperCase());
+    if (!codeMatch?.[1]) continue;
+    const receiptNo = codeMatch[1];
+    if (seen.has(receiptNo)) continue;
+    seen.add(receiptNo);
+    const amounts = [...line.matchAll(MONEY)].map((item) => parseMoney(item[1] ?? ""));
+    // M-Pesa rows usually end with Paid In, Withdrawn, Balance.
+    const paidInKes =
+      amounts.length >= 3 ? (amounts[amounts.length - 3] ?? null) : (amounts[0] ?? null);
+    const withdrawnKes =
+      amounts.length >= 3 ? (amounts[amounts.length - 2] ?? null) : amounts.length === 2 ? (amounts[1] ?? null) : null;
+    const timeMatch = line.match(/(\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?::\d{2})?|\d{1,2}\/\d{1,2}\/\d{2,4}\s+\d{1,2}:\d{2}(?::\d{2})?(?:\s*[AP]M)?)/i);
+    rows.push({
+      receiptNo,
+      completedAt: parseCompletion(timeMatch?.[1] ?? ""),
+      details: line.trim().slice(0, 240),
+      status: /fail/i.test(line) ? "Failed" : "Completed",
+      paidInKes,
+      withdrawnKes: amounts.length >= 2 ? withdrawnKes : null,
+    });
+  }
+  return rows;
 }
 
 /**
