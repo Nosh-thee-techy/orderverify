@@ -18,5 +18,9 @@ export function MarketingPage({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <div className={cn("marketing-page min-h-screen bg-brand-bg text-brand-ink antialiased", className)}>{children}</div>;
+  return (
+    <div className={cn("marketing-page min-h-screen overflow-x-hidden bg-brand-bg text-brand-ink antialiased", className)}>
+      {children}
+    </div>
+  );
 }

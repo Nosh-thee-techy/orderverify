@@ -16,7 +16,7 @@ const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
   title: "OrderVerify",
-  description: "Hold a risky M-Pesa order before you dispatch it.",
+  description: "Verify M-Pesa payments against your orders before you dispatch.",
 };
 
 /** The document shell. Pages render inside Providers. */

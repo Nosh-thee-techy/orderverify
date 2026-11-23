@@ -4,7 +4,9 @@
  */
 export { Button, buttonVariants, type ButtonProps } from "./Button";
 export { Container } from "./Container";
+export { Logo } from "./Logo";
 export { MarketingPage } from "./MarketingPage";
+export { Navbar } from "./Navbar";
 export { Section } from "./Section";
 export { SectionHeading } from "./SectionHeading";
 export { StatusBadge, type MarketingStatus } from "./StatusBadge";

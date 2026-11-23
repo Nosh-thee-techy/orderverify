@@ -11,7 +11,7 @@ import { cn } from "@/lib/cn";
 import { useI18n } from "@/i18n";
 
 const tabs = [
-  { href: "/", key: "today" as const, icon: CalendarCheck },
+  { href: "/today", key: "today" as const, icon: CalendarCheck },
   { href: "/check", key: "check" as const, icon: ShieldCheck },
   { href: "/wallet", key: "wallet" as const, icon: Wallet },
   { href: "/settings", key: "settings" as const, icon: Settings },
@@ -32,7 +32,7 @@ export function AppShell({ children, bypass }: { children: React.ReactNode; bypa
         <div className="bg-hold px-4 py-3 text-center text-sm font-semibold text-white">{t.bypass}</div>
       ) : null}
       <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <Link href="/" className="text-lg font-semibold tracking-tight text-primary">
+        <Link href="/today" className="text-lg font-semibold tracking-tight text-primary">
           {t.appName}
         </Link>
         <div className="flex rounded-control border border-line bg-surface p-1 text-sm">
@@ -103,7 +103,7 @@ function NavLink({
 }
 
 function isActive(path: string, href: string): boolean {
-  if (href === "/") return path === "/";
+  if (href === "/today") return path === "/today";
   return path.startsWith(href);
 }
 
