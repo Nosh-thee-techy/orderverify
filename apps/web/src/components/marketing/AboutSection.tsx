@@ -7,21 +7,18 @@
  * - beauty: Monstera Production
  * - orders: Alexander Suhorucov
  */
+"use client";
+
 import { Check } from "lucide-react";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { Section } from "./Section";
 import { SectionHeading } from "./SectionHeading";
 
-const points = [
-  "Stop forged payment confirmations.",
-  "Avoid costly mistakes.",
-  "Grow your business with confidence.",
-] as const;
-
 const collage = [
   {
     src: "/images/about/clothing.webp",
-    alt: "A clothing boutique with colourful dresses on display.",
+    altKey: "clothing" as const,
     className: "left-[2%] top-[8%] z-20 w-[64%] -rotate-[6deg]",
     imageClassName: "aspect-[3/4] object-[center_38%]",
     width: 1200,
@@ -29,7 +26,7 @@ const collage = [
   },
   {
     src: "/images/about/beauty.webp",
-    alt: "Amber skincare bottles and spa products on a wooden tray.",
+    altKey: "beauty" as const,
     className: "right-[1%] top-[2%] z-30 w-[50%] rotate-[9deg]",
     imageClassName: "aspect-[4/5] object-center",
     width: 1000,
@@ -37,7 +34,7 @@ const collage = [
   },
   {
     src: "/images/about/orders.webp",
-    alt: "A seller checking an order on her phone while working on a laptop.",
+    altKey: "orders" as const,
     className: "left-[22%] top-[48%] z-40 w-[56%] -rotate-[5deg]",
     imageClassName: "aspect-[5/4] object-[68%_center]",
     width: 1100,
@@ -96,10 +93,11 @@ function CollagePhoto({
  * @returns The collage figure
  */
 function AboutCollage() {
+  const { t } = useI18n();
   return (
     <figure
       className="relative mx-auto aspect-[4/5] w-full max-w-[28rem] overflow-hidden sm:max-w-[32rem] lg:max-w-none lg:overflow-visible"
-      aria-label="Sellers in clothing, beauty, and social-commerce businesses"
+      aria-label={t.landing.about.collageLabel}
     >
       {/* Decorative shapes sit behind the photos so the collage feels editorial, not a card grid. */}
       <span
@@ -120,7 +118,15 @@ function AboutCollage() {
       />
 
       {collage.map((photo) => (
-        <CollagePhoto key={photo.src} {...photo} />
+        <CollagePhoto
+          key={photo.src}
+          src={photo.src}
+          alt={t.landing.about.alts[photo.altKey]}
+          className={photo.className}
+          imageClassName={photo.imageClassName}
+          width={photo.width}
+          height={photo.height}
+        />
       ))}
     </figure>
   );
@@ -132,17 +138,15 @@ function AboutCollage() {
  * @returns The About landing section
  */
 export function AboutSection() {
+  const { t } = useI18n();
+  const about = t.landing.about;
   return (
     <Section id="about" width="wide" className="scroll-mt-24">
       <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16 xl:gap-20">
         <div>
-          <SectionHeading
-            eyebrow="About OrderVerify"
-            title="A smarter way to verify M-Pesa payments."
-            description="OrderVerify makes it easier for online sellers to check whether customer payments match their orders before dispatch."
-          />
+          <SectionHeading eyebrow={about.eyebrow} title={about.title} description={about.description} />
           <ul className="mt-8 space-y-3.5">
-            {points.map((point) => (
+            {about.points.map((point) => (
               <li key={point} className="flex items-start gap-3">
                 <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-yellow/60 text-brand-orange">
                   <Check className="h-3.5 w-3.5" strokeWidth={2.75} aria-hidden />

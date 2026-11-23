@@ -11,6 +11,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { ArrowRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { Button } from "./Button";
 import { Container } from "./Container";
@@ -19,30 +20,21 @@ const AUTO_MS = 6500;
 
 const slides = [
   {
-    id: "clothing",
+    id: "clothing" as const,
     image: "/images/hero/clothing.webp",
     positionClass: "bg-[position:38%_28%] max-md:bg-[position:32%_22%]",
-    headline: "Verify the payment. Then dispatch.",
-    description: "Check M-Pesa payments against your orders before sending them out.",
-    alt: "Clothing sellers with a rail of garments in their boutique.",
   },
   {
-    id: "beauty",
+    id: "beauty" as const,
     image: "/images/hero/beauty.webp",
     positionClass: "bg-[position:50%_18%] max-md:bg-[position:50%_12%]",
-    headline: "Protect every order before it leaves.",
-    description: "Spend less time matching payments manually and more time growing your business.",
-    alt: "A beauty entrepreneur holding skincare products from her catalogue.",
   },
   {
-    id: "social",
+    id: "social" as const,
     image: "/images/hero/social.webp",
     positionClass: "bg-[position:50%_22%] max-md:bg-[position:50%_18%]",
-    headline: "Your orders deserve a second check.",
-    description: "Affordable payment verification for the way you sell online.",
-    alt: "A social-commerce seller recording product content with a ring light.",
   },
-] as const;
+];
 
 /**
  * Full-bleed hero carousel for the public landing page.
@@ -50,6 +42,8 @@ const slides = [
  * @returns The hero section, including autoplay and pause controls
  */
 export function HeroCarousel() {
+  const { t } = useI18n();
+  const copy = t.landing.hero;
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [userPaused, setUserPaused] = useState(false);
@@ -99,6 +93,8 @@ export function HeroCarousel() {
   };
 
   const active = slides[index] ?? slides[0];
+  if (!active) return null;
+  const activeCopy = copy.slides[active.id];
 
   return (
     <section
@@ -126,7 +122,7 @@ export function HeroCarousel() {
               key={slide.id}
               role="group"
               aria-roledescription="slide"
-              aria-label={`${slideIndex + 1} of ${slides.length}: ${slide.alt}`}
+              aria-label={`${slideIndex + 1} ${copy.of} ${slides.length}: ${copy.slides[slide.id].alt}`}
               aria-hidden={!visible}
               className={cn(
                 "absolute inset-0 bg-cover bg-no-repeat",
@@ -155,16 +151,16 @@ export function HeroCarousel() {
               id={`${regionId}-title`}
               className="mt-3 font-display text-[2.15rem] font-semibold leading-[1.08] tracking-tight sm:text-display-lg lg:text-display-xl"
             >
-              {active.headline}
+              {activeCopy.headline}
             </h1>
-            <p className="mt-4 max-w-lg text-base leading-relaxed text-white/85 sm:text-lg">{active.description}</p>
+            <p className="mt-4 max-w-lg text-base leading-relaxed text-white/85 sm:text-lg">{activeCopy.description}</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Button href="/check" size="lg" className="w-full sm:w-auto">
-                Start Verifying
+                {t.landing.nav.startVerifying}
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Button>
               <Button href="#how-it-works" variant="secondaryOnDark" size="lg" className="w-full sm:w-auto">
-                See How It Works
+                {copy.seeHow}
               </Button>
             </div>
           </div>
@@ -172,40 +168,40 @@ export function HeroCarousel() {
 
         {/* Side arrows only on wide desktops — below 1440 they sit on the headline. */}
         <div className="pointer-events-none absolute inset-x-0 top-1/2 z-10 hidden -translate-y-1/2 justify-between px-8 min-[1440px]:flex">
-          <CarouselButton label="Previous slide" onClick={() => goTo(index - 1, true)}>
+          <CarouselButton label={copy.prev} onClick={() => goTo(index - 1, true)}>
             <ChevronLeft className="h-5 w-5" aria-hidden />
           </CarouselButton>
-          <CarouselButton label="Next slide" onClick={() => goTo(index + 1, true)}>
+          <CarouselButton label={copy.next} onClick={() => goTo(index + 1, true)}>
             <ChevronRight className="h-5 w-5" aria-hidden />
           </CarouselButton>
         </div>
 
         <div className="absolute inset-x-0 bottom-4 z-10 flex items-center justify-between gap-2 px-3 min-[1440px]:hidden">
-          <CarouselButton label="Previous slide" onClick={() => goTo(index - 1, true)}>
+          <CarouselButton label={copy.prev} onClick={() => goTo(index - 1, true)}>
             <ChevronLeft className="h-5 w-5" aria-hidden />
           </CarouselButton>
           <div className="flex items-center gap-1">
-            <SlideDots index={index} onSelect={(slideIndex) => goTo(slideIndex, true)} />
+            <SlideDots index={index} copy={copy} onSelect={(slideIndex) => goTo(slideIndex, true)} />
             {reduceMotion ? null : (
-              <PauseButton paused={userPaused} onClick={() => setUserPaused((value) => !value)} />
+              <PauseButton paused={userPaused} play={copy.play} pause={copy.pause} onClick={() => setUserPaused((value) => !value)} />
             )}
           </div>
-          <CarouselButton label="Next slide" onClick={() => goTo(index + 1, true)}>
+          <CarouselButton label={copy.next} onClick={() => goTo(index + 1, true)}>
             <ChevronRight className="h-5 w-5" aria-hidden />
           </CarouselButton>
         </div>
 
         <div className="absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 items-center gap-2 min-[1440px]:flex">
-          <SlideDots index={index} onSelect={(slideIndex) => goTo(slideIndex, true)} />
+          <SlideDots index={index} copy={copy} onSelect={(slideIndex) => goTo(slideIndex, true)} />
           {reduceMotion ? null : (
-            <PauseButton paused={userPaused} onClick={() => setUserPaused((value) => !value)} />
+            <PauseButton paused={userPaused} play={copy.play} pause={copy.pause} onClick={() => setUserPaused((value) => !value)} />
           )}
         </div>
       </div>
 
       <p className="sr-only" aria-live="polite">
-        Slide {index + 1} of {slides.length}: {active.headline}
-        {userPaused || paused || reduceMotion ? "" : " Autoplaying."}
+        {copy.slideOf} {index + 1} {copy.of} {slides.length}: {activeCopy.headline}
+        {userPaused || paused || reduceMotion ? "" : ` ${copy.autoplaying}`}
       </p>
     </section>
   );
@@ -213,9 +209,11 @@ export function HeroCarousel() {
 
 function SlideDots({
   index,
+  copy,
   onSelect,
 }: {
   index: number;
+  copy: { showSlide: string; slides: Record<string, { headline: string }> };
   onSelect: (slideIndex: number) => void;
 }) {
   return (
@@ -225,7 +223,7 @@ function SlideDots({
           key={slide.id}
           type="button"
           className="group flex h-11 w-11 items-center justify-center"
-          aria-label={`Show slide ${slideIndex + 1}: ${slide.headline}`}
+          aria-label={`${copy.showSlide} ${slideIndex + 1}: ${copy.slides[slide.id]?.headline ?? ""}`}
           aria-current={slideIndex === index ? "true" : undefined}
           onClick={() => onSelect(slideIndex)}
         >
@@ -248,12 +246,22 @@ function SlideDots({
  * @param props.paused - Whether the seller has paused autoplay
  * @param props.onClick - Toggle handler
  */
-function PauseButton({ paused, onClick }: { paused: boolean; onClick: () => void }) {
+function PauseButton({
+  paused,
+  play,
+  pause,
+  onClick,
+}: {
+  paused: boolean;
+  play: string;
+  pause: string;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
       className="pointer-events-auto inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-brand-ink/35 text-white backdrop-blur-sm transition-colors hover:bg-brand-ink/70"
-      aria-label={paused ? "Play slideshow" : "Pause slideshow"}
+      aria-label={paused ? play : pause}
       aria-pressed={paused}
       onClick={onClick}
     >

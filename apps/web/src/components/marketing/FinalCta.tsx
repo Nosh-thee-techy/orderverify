@@ -2,7 +2,10 @@
  * apps/web/src/components/marketing/FinalCta.tsx
  * Full-width sunset CTA. Uses the exact brand gradient, not a substitute.
  */
+"use client";
+
 import { ArrowRight } from "lucide-react";
+import { useI18n } from "@/i18n";
 import { Button } from "./Button";
 import { Container } from "./Container";
 
@@ -12,6 +15,7 @@ import { Container } from "./Container";
  * @returns The gradient CTA section
  */
 export function FinalCta() {
+  const { t } = useI18n();
   return (
     <section className="relative overflow-hidden bg-brand-sunset" aria-labelledby="final-cta-heading">
       {/* Soft plum wash keeps white type readable without hiding yellow → orange → pink. */}
@@ -39,15 +43,12 @@ export function FinalCta() {
               id="final-cta-heading"
               className="font-display text-[2.15rem] font-semibold leading-[1.1] tracking-tight text-white sm:text-display-lg"
             >
-              Protect your next batch before it leaves your hands.
+              {t.landing.cta.title}
             </h2>
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-white/90 sm:text-lg">
-              Give every order a second check. Verify payments, review suspicious orders and dispatch with greater
-              confidence.
-            </p>
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-white/90 sm:text-lg">{t.landing.cta.body}</p>
           </div>
           <Button href="/check" variant="dark" size="lg" className="marketing-rise w-full shadow-brand-lg sm:w-auto [animation-delay:120ms]">
-            Start Verifying
+            {t.landing.nav.startVerifying}
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Button>
         </div>

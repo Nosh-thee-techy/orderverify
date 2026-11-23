@@ -6,6 +6,7 @@ import { preload } from "react-dom";
 import {
   AboutSection,
   BenefitsStrip,
+  FaqEvalSection,
   FinalCta,
   Footer,
   HeroCarousel,
@@ -13,6 +14,7 @@ import {
   MarketingPage,
   Navbar,
   ReportPreview,
+  SkipLink,
   WhyChoose,
 } from "@/components/marketing";
 
@@ -24,12 +26,7 @@ export default function LandingPage() {
 
   return (
     <MarketingPage>
-      <a
-        href="#content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[80] focus:rounded-brand-control focus:bg-brand-ink focus:px-4 focus:py-2.5 focus:text-sm focus:font-semibold focus:text-white"
-      >
-        Skip to content
-      </a>
+      <SkipLink />
       <Navbar />
       <main id="content" tabIndex={-1}>
         <HeroCarousel />
@@ -39,6 +36,7 @@ export default function LandingPage() {
         <ReportPreview />
         <WhyChoose />
         <FinalCta />
+        <FaqEvalSection />
       </main>
       <Footer />
     </MarketingPage>

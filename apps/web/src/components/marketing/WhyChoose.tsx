@@ -2,47 +2,20 @@
  * apps/web/src/components/marketing/WhyChoose.tsx
  * Five-card reasons band. Nav target: #why-orderverify.
  */
+"use client";
+
 import { Coins, ShieldCheck, ThumbsUp, UserCheck, Zap } from "lucide-react";
+import { useI18n } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { Section } from "./Section";
 import { SectionHeading } from "./SectionHeading";
 
-const cards = [
-  {
-    title: "Affordable Verification.",
-    description: "Pay per batch instead of maintaining expensive monthly subscriptions.",
-    icon: Coins,
-    iconClass: "bg-brand-yellow/70 text-brand-orange",
-    accentClass: "bg-brand-yellow/40",
-  },
-  {
-    title: "Less Manual Work.",
-    description: "Reduce the time spent matching orders with payment messages.",
-    icon: Zap,
-    iconClass: "bg-[#FDE4C8] text-brand-tangerine",
-    accentClass: "bg-brand-tangerine/20",
-  },
-  {
-    title: "Detect Suspicious Payments.",
-    description: "Identify duplicate codes, amount mismatches and inconsistent payment details.",
-    icon: ShieldCheck,
-    iconClass: "bg-[#FAD4E4] text-brand-raspberry",
-    accentClass: "bg-brand-raspberry/15",
-  },
-  {
-    title: "Better Dispatch Decisions.",
-    description: "Review suspicious orders before releasing goods.",
-    icon: ThumbsUp,
-    iconClass: "bg-brand-yellow/55 text-brand-orange",
-    accentClass: "bg-brand-yellow/35",
-  },
-  {
-    title: "You Stay in Control.",
-    description: "You decide what happens to orders that require further review.",
-    icon: UserCheck,
-    iconClass: "bg-[#FDE4C8] text-brand-tangerine",
-    accentClass: "bg-brand-tangerine/20",
-  },
+const cardMeta = [
+  { icon: Coins, iconClass: "bg-brand-yellow/70 text-brand-orange", accentClass: "bg-brand-yellow/40" },
+  { icon: Zap, iconClass: "bg-[#FDE4C8] text-brand-tangerine", accentClass: "bg-brand-tangerine/20" },
+  { icon: ShieldCheck, iconClass: "bg-[#FAD4E4] text-brand-raspberry", accentClass: "bg-brand-raspberry/15" },
+  { icon: ThumbsUp, iconClass: "bg-brand-yellow/55 text-brand-orange", accentClass: "bg-brand-yellow/35" },
+  { icon: UserCheck, iconClass: "bg-[#FDE4C8] text-brand-tangerine", accentClass: "bg-brand-tangerine/20" },
 ] as const;
 
 /**
@@ -51,16 +24,20 @@ const cards = [
  * @returns The why-choose landing section
  */
 export function WhyChoose() {
+  const { t } = useI18n();
+  const why = t.landing.why;
   return (
     <Section id="why-orderverify" width="wide" tone="surface" className="scroll-mt-24">
-      <SectionHeading align="center" title="Why Choose OrderVerify" />
+      <SectionHeading align="center" title={why.title} />
 
       <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-6">
-        {cards.map((card, index) => {
+        {cardMeta.map((card, index) => {
           const Icon = card.icon;
+          const copy = why.cards[index];
+          if (!copy) return null;
           return (
             <li
-              key={card.title}
+              key={copy.title}
               className={cn(
                 "group relative overflow-hidden rounded-brand-card border border-[#F3E6D4] bg-brand-bg p-6 shadow-brand-sm",
                 "transition-[transform,box-shadow] duration-200 ease-brand",
@@ -82,8 +59,8 @@ export function WhyChoose() {
               >
                 <Icon className="h-5 w-5" strokeWidth={1.85} aria-hidden />
               </span>
-              <h3 className="relative mt-5 text-[1.05rem] font-semibold tracking-tight text-brand-ink">{card.title}</h3>
-              <p className="relative mt-2 text-sm leading-relaxed text-brand-muted">{card.description}</p>
+              <h3 className="relative mt-5 text-[1.05rem] font-semibold tracking-tight text-brand-ink">{copy.title}</h3>
+              <p className="relative mt-2 text-sm leading-relaxed text-brand-muted">{copy.description}</p>
             </li>
           );
         })}
