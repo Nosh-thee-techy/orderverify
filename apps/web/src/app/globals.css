@@ -1,6 +1,7 @@
 /**
  * apps/web/src/app/globals.css
- * Warm-paper theme. Status is never colour alone: components add an icon and a word.
+ * Warm-paper theme for the authenticated product, plus a scoped marketing
+ * theme for the public landing page. Dashboard colours stay on :root.
  */
 @tailwind base;
 @tailwind components;
@@ -32,6 +33,70 @@ body {
 
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Public marketing surface. Apply `.marketing-page` on the landing wrapper so
+ * dashboard screens keep the green product theme.
+ */
+.marketing-page {
+  --paper: #fffbf0;
+  --ink: #2a1020;
+  --focus: #c85a0c;
+  --brand-yellow: #ffd416;
+  --brand-tangerine: #e4701d;
+  --brand-raspberry: #e72369;
+  --brand-orange: #c85a0c;
+  --brand-muted: #7a6670;
+  --section-space: clamp(3.75rem, 7vw, 7rem);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.marketing-page :focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.marketing-page ::selection {
+  background: var(--brand-yellow);
+  color: var(--ink);
+}
+
+.bg-brand-sunset {
+  background-image: linear-gradient(135deg, #ffd416, #e4701d 50%, #e72369);
+}
+
+@layer components {
+  .marketing-kicker {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--brand-tangerine);
+  }
+
+  .marketing-title {
+    font-family: var(--font-display), Fraunces, Georgia, serif;
+    font-size: clamp(2rem, 3.2vw, 2.5rem);
+    font-weight: 600;
+    line-height: 1.14;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+  }
+
+  .marketing-lead {
+    max-width: 40rem;
+    font-size: 1.125rem;
+    line-height: 1.65;
+    color: var(--brand-muted);
+  }
+
+  .marketing-body {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--brand-muted);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
