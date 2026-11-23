@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../apps/web/src", import.meta.url));
-const banned = ["AGENT_SECRET", "OZ_API_KEY", "ANTHROPIC_API_KEY"];
+const banned = ["AGENT_SECRET", "OZ_API_KEY", "ANTHROPIC_API_KEY", "RESEND_API_KEY"];
 const hits = [];
 
 function walk(dir) {
