@@ -6,6 +6,7 @@ export { AboutSection } from "./AboutSection";
 export { BenefitsStrip } from "./BenefitsStrip";
 export { Button, buttonVariants, type ButtonProps } from "./Button";
 export { Container } from "./Container";
+export { FinalCta } from "./FinalCta";
 export { HeroCarousel } from "./HeroCarousel";
 export { HowItWorks } from "./HowItWorks";
 export { Logo } from "./Logo";
