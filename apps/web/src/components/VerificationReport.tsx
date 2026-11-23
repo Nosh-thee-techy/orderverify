@@ -151,7 +151,7 @@ export function VerificationReport({
           <Mail className="h-4 w-4" aria-hidden />
           {t.sendToEmail}
         </ActionButton>
-        <ActionButton variant="quiet" onClick={() => router.push("/today")}>
+        <ActionButton variant="quiet" onClick={() => router.push("/dashboard")}>
           <X className="h-4 w-4" aria-hidden />
           {t.closeReport}
         </ActionButton>
@@ -201,7 +201,7 @@ export function VerificationReport({
         <header className="border-b border-[#F0E2C8] bg-[#FFF8E4] px-5 py-6 sm:px-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0">
-              <Logo href="/today" />
+              <Logo href="/dashboard" />
               <h1 className="mt-3 font-display text-2xl font-semibold tracking-tight text-brand-ink sm:text-3xl">{t.reportViewTitle}</h1>
             </div>
             <span className="rounded-brand-pill bg-[#FFF4C2] px-3 py-1 text-sm font-semibold text-brand-orange">{t.completed}</span>

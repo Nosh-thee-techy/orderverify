@@ -14,16 +14,19 @@ const repoRoot = resolve(appDir, "../..");
 loadEnv({ path: resolve(repoRoot, ".env") });
 loadEnv({ path: resolve(appDir, ".env") });
 
+const clerkCsp = "https://*.clerk.accounts.dev https://*.clerk.com https://clerk.com https://challenges.cloudflare.com";
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${clerkCsp}`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
-  "img-src 'self' data:",
-  "connect-src 'self'",
+  `img-src 'self' data: blob: https://img.clerk.com https://*.clerk.com`,
+  `connect-src 'self' ${clerkCsp} https://clerk-telemetry.com`,
+  `frame-src ${clerkCsp}`,
+  "worker-src 'self' blob:",
   "frame-ancestors 'none'",
   "base-uri 'self'",
-  "form-action 'self'",
+  `form-action 'self' ${clerkCsp}`,
 ].join("; ");
 
 const nextConfig: NextConfig = {

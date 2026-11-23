@@ -5,8 +5,10 @@
  * Poppins is the product UI face. Fraunces stays the display face for headings.
  */
 import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Fraunces, JetBrains_Mono, Poppins } from "next/font/google";
 import { Providers } from "@/components/Providers";
+import { clerkAppearance } from "@/lib/clerkAppearance";
 import "./globals.css";
 
 const sans = Poppins({
@@ -27,7 +29,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${sans.variable} ${display.variable} ${mono.variable} font-sans antialiased`}>
-        <Providers>{children}</Providers>
+        <ClerkProvider appearance={clerkAppearance}>
+          <Providers>{children}</Providers>
+        </ClerkProvider>
       </body>
     </html>
   );

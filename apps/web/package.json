@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
+    "@clerk/nextjs": "^7.10.8",
     "@hookform/resolvers": "^3.9.1",
     "@orderverify/engine": "*",
     "@orderverify/fixtures": "*",

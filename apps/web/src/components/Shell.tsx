@@ -5,17 +5,19 @@
  */
 "use client";
 
+import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { CalendarCheck, Home, Menu, Rocket, Settings, ShieldCheck, Wallet, X } from "lucide-react";
 import { LanguageMenu } from "@/components/LanguageMenu";
 import { Logo } from "@/components/marketing/Logo";
+import { clerkAppearance } from "@/lib/clerkAppearance";
 import { cn } from "@/lib/cn";
 import { useI18n } from "@/i18n";
 
 const tabs = [
-  { href: "/today", key: "today" as const, icon: CalendarCheck },
+  { href: "/dashboard", key: "today" as const, icon: CalendarCheck },
   { href: "/check", key: "check" as const, icon: ShieldCheck },
   { href: "/wallet", key: "wallet" as const, icon: Wallet },
   { href: "/settings", key: "settings" as const, icon: Settings },
@@ -96,7 +98,7 @@ export function AppShell({ children, bypass }: { children: React.ReactNode; bypa
         <aside className="sticky top-0 hidden h-screen w-60 shrink-0 border-r border-[#F0E2C8] bg-white xl:w-64 lg:flex">
           <div className="relative flex h-full w-full flex-col overflow-hidden">
             <div className="flex h-16 items-center px-5">
-              <Logo href="/today" />
+              <Logo href="/dashboard" />
             </div>
             <nav className="flex-1 px-3 py-4" aria-label="Main">
               <SidebarLinks path={path} />
@@ -122,9 +124,10 @@ export function AppShell({ children, bypass }: { children: React.ReactNode; bypa
                 <Menu className="h-5 w-5" aria-hidden />
               </button>
             )}
-            <Logo href="/today" className="lg:hidden" />
+            <Logo href="/dashboard" className="lg:hidden" />
             <div className="ml-auto flex items-center gap-3">
               {displayName ? <UserChip name={displayName} /> : null}
+              <UserButton appearance={clerkAppearance} />
             </div>
           </header>
 
@@ -148,7 +151,7 @@ export function AppShell({ children, bypass }: { children: React.ReactNode; bypa
             className="fixed inset-y-0 left-0 z-50 flex w-[min(18rem,100%)] flex-col overflow-hidden bg-white shadow-brand-lg"
           >
             <div className="flex h-16 items-center justify-between px-4">
-              <Logo href="/today" />
+              <Logo href="/dashboard" />
               <button
                 ref={closeRef}
                 type="button"
@@ -292,7 +295,7 @@ function SidebarGlow() {
 }
 
 function isActive(path: string, href: string): boolean {
-  if (href === "/today") return path === "/today";
+  if (href === "/dashboard") return path === "/dashboard" || path === "/today";
   return path.startsWith(href);
 }
 
