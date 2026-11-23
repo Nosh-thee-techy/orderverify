@@ -67,6 +67,7 @@ export function WhyChoose() {
                 "hover:-translate-y-1 hover:shadow-brand",
                 "lg:col-span-2",
                 index === 3 && "lg:col-start-2",
+                index === 4 && "sm:col-span-2 lg:col-span-2",
               )}
             >
               <span

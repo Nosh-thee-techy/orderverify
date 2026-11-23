@@ -121,9 +121,9 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  .marketing-page *,
+  .marketing-page *::before,
+  .marketing-page *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }

@@ -24,18 +24,24 @@ const collage = [
     alt: "A clothing boutique with colourful dresses on display.",
     className: "left-[2%] top-[8%] z-20 w-[64%] -rotate-[6deg]",
     imageClassName: "aspect-[3/4] object-[center_38%]",
+    width: 1200,
+    height: 1800,
   },
   {
     src: "/images/about/beauty.webp",
     alt: "Amber skincare bottles and spa products on a wooden tray.",
     className: "right-[1%] top-[2%] z-30 w-[50%] rotate-[9deg]",
     imageClassName: "aspect-[4/5] object-center",
+    width: 1000,
+    height: 1500,
   },
   {
     src: "/images/about/orders.webp",
     alt: "A seller checking an order on her phone while working on a laptop.",
     className: "left-[22%] top-[48%] z-40 w-[56%] -rotate-[5deg]",
     imageClassName: "aspect-[5/4] object-[68%_center]",
+    width: 1100,
+    height: 734,
   },
 ] as const;
 
@@ -46,17 +52,23 @@ const collage = [
  * @param props.alt - Accessible description of the photo
  * @param props.className - Absolute position, size, and rotation
  * @param props.imageClassName - Aspect ratio and crop
+ * @param props.width - Intrinsic pixel width for layout
+ * @param props.height - Intrinsic pixel height for layout
  */
 function CollagePhoto({
   src,
   alt,
   className,
   imageClassName,
+  width,
+  height,
 }: {
   src: string;
   alt: string;
   className: string;
   imageClassName: string;
+  width: number;
+  height: number;
 }) {
   return (
     <div
@@ -65,7 +77,15 @@ function CollagePhoto({
         className,
       )}
     >
-      <img src={src} alt={alt} className={cn("w-full rounded-[1.1rem] object-cover", imageClassName)} />
+      <img
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        loading="lazy"
+        decoding="async"
+        className={cn("h-full w-full rounded-[1.1rem] object-cover", imageClassName)}
+      />
     </div>
   );
 }

@@ -82,6 +82,14 @@ export function Button(props: ButtonProps) {
         </a>
       );
     }
+    // Hash targets stay native so in-page smooth scroll is not intercepted by the router.
+    if (href.startsWith("#")) {
+      return (
+        <a href={href} className={classes} {...linkProps}>
+          {children}
+        </a>
+      );
+    }
     return (
       <Link href={href} className={classes} {...linkProps}>
         {children}

@@ -53,7 +53,7 @@ export function HowItWorks() {
         description="Four simple steps to verify your payments before dispatch."
       />
 
-      <ol className="mt-12 grid gap-10 sm:mt-14 sm:gap-12 lg:grid-cols-4 lg:gap-6">
+      <ol className="mt-12 grid gap-10 sm:mt-14 sm:gap-12 lg:grid-cols-2 lg:gap-10 xl:grid-cols-4 xl:gap-6">
         {steps.map((step, index) => {
           const Icon = step.icon;
           const last = index === steps.length - 1;
@@ -63,7 +63,7 @@ export function HowItWorks() {
               {/* Desktop connector from this icon to the next. */}
               {last ? null : (
                 <span
-                  className="pointer-events-none absolute left-[calc(50%+2.35rem)] top-[3.35rem] hidden h-[2px] w-[calc(100%-2.2rem)] bg-gradient-to-r from-brand-tangerine to-brand-raspberry/80 lg:block"
+                  className="pointer-events-none absolute left-[calc(50%+2.35rem)] top-[3.35rem] hidden h-[2px] w-[calc(100%-2.2rem)] bg-gradient-to-r from-brand-tangerine to-brand-raspberry/80 xl:block"
                   aria-hidden
                 >
                   <ChevronRight className="absolute -right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-raspberry" />

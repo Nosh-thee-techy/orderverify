@@ -28,6 +28,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const menuId = useId();
+  const drawerRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
@@ -45,7 +46,26 @@ export function Navbar() {
     closeRef.current?.focus();
 
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      // Keep Tab inside the drawer so keyboard users cannot reach the page behind it.
+      if (event.key !== "Tab" || !drawerRef.current) return;
+      const focusable = [...drawerRef.current.querySelectorAll<HTMLElement>("a[href], button:not([disabled])")].filter(
+        (el) => !el.hasAttribute("disabled") && el.tabIndex !== -1,
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => {
@@ -76,7 +96,7 @@ export function Navbar() {
               <li key={link.href}>
                 <a
                   href={link.href}
-                  className="text-[0.95rem] font-medium text-brand-ink/70 transition-colors duration-150 hover:text-brand-orange"
+                  className="inline-flex min-h-11 items-center text-[0.95rem] font-medium text-brand-ink/70 transition-colors duration-150 hover:text-brand-orange"
                 >
                   {link.label}
                 </a>
@@ -88,7 +108,7 @@ export function Navbar() {
         <div className="hidden items-center gap-5 lg:flex">
           <Link
             href="/today"
-            className="text-[0.95rem] font-medium text-brand-ink/70 transition-colors duration-150 hover:text-brand-ink"
+            className="inline-flex min-h-11 items-center text-[0.95rem] font-medium text-brand-ink/70 transition-colors duration-150 hover:text-brand-ink"
           >
             Sign In
           </Link>
@@ -115,9 +135,10 @@ export function Navbar() {
       </Container>
 
       {open ? (
-        <div className="lg:hidden" id={menuId}>
+        <div ref={drawerRef} className="lg:hidden" id={menuId}>
           <button
             type="button"
+            tabIndex={-1}
             className="fixed inset-0 z-[60] bg-brand-ink/40"
             aria-label="Close menu"
             onClick={close}
