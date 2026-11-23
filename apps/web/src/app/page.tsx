@@ -6,6 +6,7 @@ import {
   AboutSection,
   BenefitsStrip,
   FinalCta,
+  Footer,
   HeroCarousel,
   HowItWorks,
   MarketingPage,
@@ -15,7 +16,7 @@ import {
 } from "@/components/marketing";
 
 /**
- * Public homepage through the closing CTA. Footer arrives in a later task.
+ * Public landing page: nav through CTA, then the branded footer.
  */
 export default function LandingPage() {
   return (
@@ -30,6 +31,7 @@ export default function LandingPage() {
         <WhyChoose />
         <FinalCta />
       </main>
+      <Footer />
     </MarketingPage>
   );
 }
