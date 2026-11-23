@@ -2,7 +2,7 @@
  * apps/web/src/app/page.tsx
  * Public landing page. Later tasks fill the sections under this navigation.
  */
-import { HeroCarousel, MarketingPage, Navbar } from "@/components/marketing";
+import { BenefitsStrip, HeroCarousel, MarketingPage, Navbar } from "@/components/marketing";
 
 /**
  * Public homepage: sticky marketing nav, photographic hero, and named section targets.
@@ -14,6 +14,7 @@ export default function LandingPage() {
       <Navbar />
       <main>
         <HeroCarousel />
+        <BenefitsStrip />
         <section id="about" className="scroll-mt-24 min-h-[70vh]" aria-labelledby="about-heading">
           <h2 id="about-heading" className="sr-only">
             About OrderVerify
