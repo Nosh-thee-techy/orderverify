@@ -11,6 +11,7 @@ export { HowItWorks } from "./HowItWorks";
 export { Logo } from "./Logo";
 export { MarketingPage } from "./MarketingPage";
 export { Navbar } from "./Navbar";
+export { ReportPreview } from "./ReportPreview";
 export { Section } from "./Section";
 export { SectionHeading } from "./SectionHeading";
 export { StatusBadge, type MarketingStatus } from "./StatusBadge";
