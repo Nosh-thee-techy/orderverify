@@ -38,12 +38,13 @@ export default function DashboardPage() {
   const date = new Intl.DateTimeFormat(lang === "sw" ? "sw-KE" : "en-KE", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
   return (
     <div className="space-y-8">
-      <GreetingBanner date={date} name={home?.displayName ?? "Akinyi"} tagline={t.tagline} greeting={t.greeting} />
+      <GreetingBanner date={date} name={home?.displayName ?? ""} tagline={t.tagline} greeting={t.greeting} />
       <div className="mx-auto max-w-5xl space-y-8">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <StatChip label={t.toCheck} value={home?.toCheck ?? 0} />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatChip label={t.batchesChecked} value={home?.batchesChecked ?? 0} />
           <StatChip label={t.onHold} value={home?.holdCount ?? 0} tone="hold" />
-          <StatChip label={t.releasedToday} value={home?.releasedToday ?? 0} tone="release" />
+          <StatChip label={t.kesHeld} value={formatKes(home?.holdKes ?? 0)} tone="hold" />
+          <StatChip label={t.weeklyCapLeft} value={formatKes(home?.weeklyCapLeftKes ?? 0)} />
         </div>
         <Link
           href="/check"

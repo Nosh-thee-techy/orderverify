@@ -5,11 +5,11 @@
  */
 "use client";
 
-import { UserButton } from "@clerk/nextjs";
+import { UserButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
-import { CalendarCheck, Home, Menu, Rocket, Settings, ShieldCheck, Wallet, X } from "lucide-react";
+import { CalendarCheck, History, Home, Menu, Rocket, Settings, ShieldCheck, Wallet, X } from "lucide-react";
 import { LanguageMenu } from "@/components/LanguageMenu";
 import { Logo } from "@/components/marketing/Logo";
 import { clerkAppearance } from "@/lib/clerkAppearance";
@@ -19,6 +19,7 @@ import { useI18n } from "@/i18n";
 const tabs = [
   { href: "/dashboard", key: "today" as const, icon: CalendarCheck },
   { href: "/check", key: "check" as const, icon: ShieldCheck },
+  { href: "/history", key: "history" as const, icon: History },
   { href: "/wallet", key: "wallet" as const, icon: Wallet },
   { href: "/settings", key: "settings" as const, icon: Settings },
 ];
@@ -32,6 +33,7 @@ export function AppShell({ children, bypass }: { children: React.ReactNode; bypa
   const path = usePathname();
   const hideNav = path.includes("/activity") || path.startsWith("/dev");
   const { t } = useI18n();
+  const { user } = useUser();
   const [open, setOpen] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const drawerId = useId();
@@ -126,7 +128,13 @@ export function AppShell({ children, bypass }: { children: React.ReactNode; bypa
             )}
             <Logo href="/dashboard" className="lg:hidden" />
             <div className="ml-auto flex items-center gap-3">
-              {displayName ? <UserChip name={displayName} /> : null}
+              {(() => {
+                const name =
+                  user?.fullName?.trim() ||
+                  user?.primaryEmailAddress?.emailAddress?.split("@")[0] ||
+                  displayName;
+                return name ? <UserChip name={name} /> : null;
+              })()}
               <UserButton appearance={clerkAppearance} />
             </div>
           </header>

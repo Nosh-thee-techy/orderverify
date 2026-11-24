@@ -28,6 +28,8 @@ export interface ReportPayload {
     phoneLast3: string | null;
     sellerDecision: string | null;
     claimedCode: string | null;
+    dismissedCrossFlag?: boolean;
+    reasons?: { id: string }[];
   }[];
   payments: { id: string; rawText: string }[];
   report: BatchReport;
@@ -39,13 +41,16 @@ export interface ReportPayload {
  *
  * @param props.payload - Stored batch + engine report
  * @param props.onDecide - Optional existing release/hold decision handler
+ * @param props.onDismissCross - Optional "this is fine" handler for a cross-shop flag
  */
 export function VerificationReport({
   payload,
   onDecide,
+  onDismissCross,
 }: {
   payload: ReportPayload;
   onDecide?: (orderId: string, decision: "released" | "held" | "more_info") => Promise<void>;
+  onDismissCross?: (orderId: string) => Promise<void>;
 }) {
   const { t, lang } = useI18n();
   const router = useRouter();
@@ -236,6 +241,7 @@ export function VerificationReport({
                   source={payload.orders.find((item) => item.id === order.orderId)}
                   draft={payload.drafts?.[order.orderId]}
                   onDecide={onDecide}
+                  onDismissCross={onDismissCross}
                 />
               ))}
             </ul>
@@ -327,11 +333,13 @@ function OrderBlock({
   source,
   draft,
   onDecide,
+  onDismissCross,
 }: {
   order: ReportOrderLine;
   source?: ReportPayload["orders"][number];
   draft?: { en: string; sw: string };
   onDecide?: (orderId: string, decision: "released" | "held" | "more_info") => Promise<void>;
+  onDismissCross?: (orderId: string) => Promise<void>;
 }) {
   const { t, lang } = useI18n();
   return (
@@ -370,6 +378,11 @@ function OrderBlock({
           <button type="button" className="min-h-12 rounded-control border border-line px-3 text-sm" onClick={() => void onDecide(order.orderId, "held")}>
             {t.keepHold}
           </button>
+          {onDismissCross && source?.reasons?.some((reason) => reason.id.startsWith("CROSS_SHOP")) && !source.dismissedCrossFlag ? (
+            <button type="button" className="min-h-12 rounded-brand-control border border-[#F0E2C8] bg-white px-3 text-sm" onClick={() => void onDismissCross(order.orderId)}>
+              {t.thisIsFine}
+            </button>
+          ) : null}
         </div>
       ) : null}
       {draft ? <div className="mt-3"><ReplyDrafts en={draft.en} swahili={draft.sw} /></div> : null}

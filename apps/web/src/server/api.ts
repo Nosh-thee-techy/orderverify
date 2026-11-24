@@ -5,14 +5,17 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import { allow } from "./rateLimit.js";
-import { getOrCreateSeller, type Seller } from "./session.js";
+import { requireSeller, type Seller } from "./seller.js";
 
 /**
- * Resolve the demo seller or return a 429 when the browser is too chatty.
+ * Resolve the signed-in Clerk seller or return 401 / 429.
  * @returns The seller, or a response the route should return immediately
  */
 export async function sellerOrLimit(): Promise<{ seller: Seller } | { response: NextResponse }> {
-  const seller = await getOrCreateSeller();
+  const seller = await requireSeller();
+  if (!seller) {
+    return { response: NextResponse.json({ error: "unauthorized" }, { status: 401 }) };
+  }
   if (!allow(seller.id)) {
     return { response: NextResponse.json({ error: "rate_limited" }, { status: 429 }) };
   }

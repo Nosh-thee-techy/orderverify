@@ -1,6 +1,7 @@
 /**
  * apps/web/src/app/settings/page.tsx
  * Language, deletion, retention, and the way to the eval page.
+ * Deleting data removes this seller's history. The Clerk account stays.
  */
 "use client";
 
@@ -9,7 +10,7 @@ import { useState } from "react";
 import { LimitsPanel } from "@/components/bits";
 import { useI18n } from "@/i18n";
 
-/** Settings. Deleting data removes the seller row and the session cookie. */
+/** Settings. Deleting data removes stored history, not the Clerk user. */
 export default function SettingsPage() {
   const { t, lang, setLang } = useI18n();
   const [confirm, setConfirm] = useState(false);

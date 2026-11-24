@@ -26,10 +26,31 @@ Requirements: Node 20+, Docker (for local Postgres).
 npm install
 docker compose up -d
 copy .env.example .env
-npm run db:migrate
 ```
 
 On macOS or Linux, use `cp` instead of `copy`.
+
+Generate the two history secrets (32-byte hex) and put them in `.env`:
+
+```bash
+openssl rand -hex 32
+```
+
+Use one value for `DATA_ENCRYPTION_KEY` and a different value for `HASH_PEPPER`.
+
+Clerk: this repo is wired to the Dashboard-selected application. In your own terminal, from the repo root:
+
+```bash
+npx -y clerk@latest auth login
+npx -y clerk@latest link --app app_3MWdgauxcDoxwOblGVrxwLg5vMz
+npx -y clerk@latest env pull
+```
+
+Then:
+
+```bash
+npm run db:migrate
+```
 
 For local UI work without testnet USDC, set `X402_MODE=bypass` in `.env`. The app shows a red banner: **BYPASS: not a real payment**. That flag is ignored when `NODE_ENV=production`.
 
@@ -37,7 +58,7 @@ For local UI work without testnet USDC, set `X402_MODE=bypass` in `.env`. The ap
 npm run dev
 ```
 
-Web: http://localhost:3000 · Verification service: http://localhost:4021/health
+
 
 ### A real payment
 
@@ -80,10 +101,17 @@ An unpaid call prints 402. The paid call prints 200, the settlement, and a Stell
 | `ANTHROPIC_MODEL` | Default `claude-sonnet-5-5` |
 | `X402_MODE` | `live` or `bypass` (bypass cannot run in production) |
 | `DEFAULT_WEEKLY_CAP_KES` | Cap for a new seller. Default 50 |
-| `PHONE_HASH_SALT` | Salt for phone hashes |
-| `RETENTION_DAYS` | Raw chat retention. Default 7 |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key |
+| `CLERK_SECRET_KEY` | Clerk secret. Server only |
+| `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | `/sign-in` |
+| `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | `/sign-up` |
+| `NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL` | `/dashboard` after sign-in |
+| `NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL` | `/dashboard` after sign-up |
+| `DATA_ENCRYPTION_KEY` | 32-byte hex AES-256-GCM key for names, phones, and codes |
+| `HASH_PEPPER` | 32-byte hex HMAC pepper for searchable hashes |
+| `KEEP_RECORDS_DAYS` | Encrypted history retention. Default 365 |
 | `RESEND_API_KEY` | Email provider used to send verification reports to users |
-| `EMAIL_FROM` | orderverify email |
+| `EMAIL_FROM` | OrderVerify from-address |
 
 ## Checks
 
@@ -103,7 +131,7 @@ Open the app, tap **Try with sample orders**, run once without the statement, th
 
 - `apps/web` on Vercel. Set the env vars. Do not set `X402_MODE=bypass`.
 - `services/verify-api` on Railway or Render, always on, public HTTPS.
-- Postgres on Neon or Supabase. Run `apps/web/drizzle/0001_init.sql`.
+- Postgres on Neon or Supabase. Run `npm run db:migrate` so `0001_init.sql`, `0002_clerk_sellers.sql`, and `0003_encrypted_history.sql` all apply.
 - Health: `GET /api/health` on the web app, `GET /health` on the verification service.
 
 ## Limits

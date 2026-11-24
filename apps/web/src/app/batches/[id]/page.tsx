@@ -37,6 +37,11 @@ export default function ResultsPage() {
     await load();
   }
 
+  async function dismissCross(orderId: string) {
+    await fetch(`/api/orders/${orderId}/dismiss-cross`, { method: "POST" });
+    await load();
+  }
+
   if (!data) {
     return (
       <div className="mx-auto max-w-4xl">
@@ -48,7 +53,7 @@ export default function ResultsPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <VerificationReport payload={data} onDecide={decide} />
+      <VerificationReport payload={data} onDecide={decide} onDismissCross={dismissCross} />
     </div>
   );
 }

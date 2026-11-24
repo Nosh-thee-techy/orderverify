@@ -2,13 +2,14 @@
  * apps/web/src/app/api/batches/route.ts
  * Creates a batch from the orders the seller confirmed, and lists recent batches.
  */
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { parseMpesaMessage, parseStatement, redactPhones, splitMpesaMessages } from "@orderverify/engine";
 import { sellerOrLimit, readJson } from "@/server/api";
 import { getDb } from "@/server/db/client";
 import { batches, orders, paymentEvidence, reports, statementRows } from "@/server/db/schema";
+import { encryptOrderFields, persistMpesaRecords } from "@/server/historyStore";
 import { phonePrivacy } from "@/server/session";
 
 const orderSchema = z.object({
@@ -38,9 +39,8 @@ export async function GET() {
   if ("response" in gate) return gate.response;
   const db = getDb();
   const rows = await db.select().from(batches).where(eq(batches.sellerId, gate.seller.id)).orderBy(desc(batches.createdAt)).limit(20);
-  const reportRows = rows.length
-    ? await db.select().from(reports)
-    : [];
+  const ids = rows.map((row) => row.id);
+  const reportRows = ids.length ? await db.select().from(reports).where(inArray(reports.batchId, ids)) : [];
   return NextResponse.json({
     batches: rows.map((batch) => {
       const report = reportRows.find((item) => item.batchId === batch.id)?.report as { counts?: { release: number; review: number; hold: number }; moneyHeldKes?: number } | undefined;
@@ -77,15 +77,34 @@ export async function POST(request: Request) {
   await db.insert(orders).values(
     parsed.data.orders.map((order) => {
       const phone = phonePrivacy(order.phone);
-      return {
-        batchId: batch.id,
+      const enc = encryptOrderFields({
         customerName: order.customerName,
-        customerPhoneHash: phone.hash,
-        customerPhoneLast3: phone.last3,
         items: order.items,
         expectedAmountKes: order.expectedAmountKes,
         orderedAt: new Date(order.orderedAt),
         claimedCode: order.claimedCode,
+        chatExcerpt: redactPhones(order.chatExcerpt ?? ""),
+        phone: order.phone,
+      });
+      return {
+        batchId: batch.id,
+        sellerId: gate.seller.id,
+        source: "upload" as const,
+        customerName: "",
+        customerPhoneHash: phone.hash,
+        customerPhoneLast3: null,
+        buyerNameEnc: enc.buyerNameEnc,
+        buyerNameHash: enc.buyerNameHash,
+        buyerPhoneEnc: enc.buyerPhoneEnc,
+        buyerPhoneHash: enc.buyerPhoneHash,
+        items: order.items,
+        itemSummary: enc.itemSummary,
+        expectedAmountKes: order.expectedAmountKes,
+        claimedAmountKes: order.expectedAmountKes,
+        orderedAt: new Date(order.orderedAt),
+        claimedCode: null,
+        claimedCodeEnc: enc.claimedCodeEnc,
+        claimedCodeHash: enc.claimedCodeHash,
         chatExcerpt: redactPhones(order.chatExcerpt ?? ""),
       };
     }),
@@ -112,6 +131,7 @@ export async function POST(request: Request) {
         withdrawnKes: row.withdrawnKes === null ? null : String(row.withdrawnKes),
       })),
     );
+    await persistMpesaRecords(gate.seller.id, batch.id, statement);
   }
   return NextResponse.json({ id: batch.id, evidenceTier: tier, orders: parsed.data.orders.length, payments: messages.length });
 }
