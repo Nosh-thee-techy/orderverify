@@ -101,10 +101,20 @@ Open the app, tap **Try with sample orders**, run once without the statement, th
 
 ## Deploy
 
-- `apps/web` on Vercel. Set the env vars. Do not set `X402_MODE=bypass`.
-- `services/verify-api` on Railway or Render, always on, public HTTPS.
-- Postgres on Neon or Supabase. Run `apps/web/drizzle/0001_init.sql`.
-- Health: `GET /api/health` on the web app, `GET /health` on the verification service.
+Production is on Fly.io (`jnb`):
+
+- Web: https://ov-ke-web.fly.dev
+- API: https://ov-ke-api.fly.dev/health
+- Postgres: `ov-ke-db` (attached to the web app as `DATABASE_URL`)
+
+```bash
+fly deploy -c fly.web.toml --remote-only
+fly deploy -c fly.api.toml --remote-only
+```
+
+Do not set `X402_MODE=bypass` in production. For live paid checks, set `OZ_API_KEY` on both apps (and fund the agent wallet with testnet USDC). Without that key the API stays up and answers `/health` with `payment: "unconfigured"`, and batch verification returns 503.
+
+Health: `GET /api/health` on the web app, `GET /health` on the verification service.
 
 ## Limits
 

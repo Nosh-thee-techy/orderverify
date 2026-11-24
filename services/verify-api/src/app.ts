@@ -27,27 +27,40 @@ export async function createApp(options: AppOptions = {}): Promise<Express> {
   const app = express();
   app.use(express.json({ limit: "512kb" }));
 
-  app.get("/health", (_req, res) => {
-    res.json({
-      ok: true,
-      priceUsd: process.env.PRICE_USD ?? "0.01",
-      payment: requirePayment ? "live" : "bypass",
-    });
-  });
+  let paymentMode: "live" | "bypass" | "unconfigured" = requirePayment ? "live" : "bypass";
 
   // Must run before payment so a replay is free and an oversized batch is not charged.
   app.use("/v1/verify-batch", idempotencyShortCircuit);
   app.use("/v1/verify-batch", rejectOversizedBatch);
 
   if (requirePayment) {
-    const { mountPayment } = await import("./payment.js");
-    mountPayment(app);
+    const { mountPayment, paymentConfigured } = await import("./payment.js");
+    if (!paymentConfigured()) {
+      paymentMode = "unconfigured";
+      // Boot without secrets so deploys can go live; refuse every paid call until keys are set.
+      app.use("/v1/verify-batch", (_req, res) => {
+        res.status(503).json({
+          error: "payment_unconfigured",
+          message: "This verification service needs FACILITATOR_URL, OZ_API_KEY, and SERVICE_RECIPIENT.",
+        });
+      });
+    } else {
+      mountPayment(app);
+    }
   } else {
     app.use("/v1/verify-batch", (_req, res, next) => {
       res.setHeader("X-Payment-Bypass", "true");
       next();
     });
   }
+
+  app.get("/health", (_req, res) => {
+    res.json({
+      ok: true,
+      priceUsd: process.env.PRICE_USD ?? "0.01",
+      payment: paymentMode,
+    });
+  });
 
   app.post("/v1/verify-batch", verifyBatchHandler);
   return app;

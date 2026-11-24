@@ -143,7 +143,7 @@ function SlideDots({
   onSelect,
 }: {
   index: number;
-  copy: { showSlide: string; slides: Record<string, { headline: string }> };
+  copy: { showSlide: string; slideOf: string; slides: Record<string, { headline: string }> };
   onSelect: (slideIndex: number) => void;
 }) {
   return (
