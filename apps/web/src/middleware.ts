@@ -7,9 +7,12 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 const isPublic = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)", "/api/health"]);
 
+// Fly, Vercel, and local. NEXT_PUBLIC_APP_URL is the canonical public origin in production.
 const authorizedParties = [
   "http://localhost:3000",
   "http://127.0.0.1:3000",
+  "https://ov-ke-web.fly.dev",
+  ...(process.env.NEXT_PUBLIC_APP_URL ? [process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "")] : []),
   ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
 ];
 
