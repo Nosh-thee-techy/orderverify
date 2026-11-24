@@ -5,12 +5,14 @@
  */
 "use client";
 
+import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, History, Search } from "lucide-react";
 import { EmptyState, StatChip } from "@/components/bits";
 import { useI18n } from "@/i18n";
 import { formatKes, formatWhen } from "@/lib/format";
+import { clerkDisplayName } from "@/lib/sellerName";
 
 interface Home {
   displayName: string;
@@ -26,6 +28,7 @@ interface Home {
 /** The home screen. */
 export default function DashboardPage() {
   const { t, lang } = useI18n();
+  const { user } = useUser();
   const [home, setHome] = useState<Home | null>(null);
   useEffect(() => {
     void fetch("/api/home")
@@ -36,9 +39,11 @@ export default function DashboardPage() {
       .catch(() => undefined);
   }, []);
   const date = new Intl.DateTimeFormat(lang === "sw" ? "sw-KE" : "en-KE", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
+  // Clerk already loaded in the shell, so the name stays when /api/home is still in flight.
+  const name = clerkDisplayName(user) || home?.displayName || "";
   return (
     <div className="space-y-8">
-      <GreetingBanner date={date} name={home?.displayName ?? ""} tagline={t.tagline} greeting={t.greeting} />
+      <GreetingBanner date={date} name={name} tagline={t.tagline} greeting={t.greeting} />
       <div className="mx-auto max-w-5xl space-y-8">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatChip label={t.batchesChecked} value={home?.batchesChecked ?? 0} />
@@ -101,8 +106,8 @@ function GreetingBanner({
           />
           <div className="min-w-0">
             <p className="text-sm font-medium text-white/85">{date}</p>
-            <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-              {greeting}, {name}
+            <h1 className="mt-1 break-words font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              {name ? `${greeting}, ${name}` : greeting}
             </h1>
             <p className="mt-2 max-w-md text-sm text-white/90 sm:text-base">{tagline}</p>
           </div>
@@ -181,9 +186,12 @@ function RecentChecks({
   );
 }
 
-/** Existing batch destinations — done goes to results, otherwise the activity stream. */
+/** Past checks open the stored report. Only an in-progress batch continues on activity. */
 function batchHref(batch: Home["batches"][number]): string {
-  return batch.status === "done" ? `/batches/${batch.id}` : `/batches/${batch.id}/activity`;
+  if (batch.status === "paying" || batch.status === "verifying" || batch.status === "ready") {
+    return `/batches/${batch.id}/activity`;
+  }
+  return `/batches/${batch.id}`;
 }
 
 /** Hold / Review / Release counts as the spec's rounded badges. Skip zeros. */

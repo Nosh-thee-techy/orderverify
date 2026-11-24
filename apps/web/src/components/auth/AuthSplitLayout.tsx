@@ -4,7 +4,8 @@
  * Below md the left panel is hidden so the form sits on cream paper.
  */
 import Image from "next/image";
-import { CheckCircle2, ShieldCheck, Truck } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, CheckCircle2, ShieldCheck, Truck } from "lucide-react";
 
 const TRUST = [
   { icon: ShieldCheck, label: "Payment verification" },
@@ -41,7 +42,6 @@ export function AuthSplitLayout({ children }: { children: React.ReactNode }) {
           aria-hidden
         />
         <div className="relative flex h-full flex-col px-10 py-10 lg:px-14">
-          <img src="/images/logo.png" alt="OrderVerify" className="h-12 w-auto object-contain sm:h-14" />
           <span
             className="mt-8 inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-[#FFD416]"
             aria-hidden
@@ -52,9 +52,7 @@ export function AuthSplitLayout({ children }: { children: React.ReactNode }) {
             <h1 className="max-w-md font-display text-4xl font-semibold leading-tight tracking-tight text-white lg:text-5xl">
               Every order deserves to be verified.
             </h1>
-            <p className="mt-4 max-w-md text-base leading-relaxed text-white/85">
-              Know which payments have cleared, which orders need attention, and when it&apos;s safe to fulfil.
-            </p>
+           
             <ul className="mt-6 flex flex-col gap-3">
               {TRUST.map((item) => (
                 <li key={item.label} className="flex items-center gap-3 text-sm font-medium text-white/90">
@@ -65,11 +63,21 @@ export function AuthSplitLayout({ children }: { children: React.ReactNode }) {
                 </li>
               ))}
             </ul>
+
           </div>
         </div>
       </aside>
       <div className="col-span-12 flex min-h-screen items-center justify-center px-6 py-12 md:col-span-6">
-        <div className="w-full max-w-md">{children}</div>
+        <div className="w-full max-w-md">
+          <Link
+            href="/"
+            className="mb-6 inline-flex min-h-11 items-center gap-2 rounded-brand-control border border-[#F0E2C8] bg-white px-4 text-sm font-medium text-brand-ink transition-colors hover:border-brand-orange hover:text-brand-orange"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            Back
+          </Link>
+          {children}
+        </div>
       </div>
     </div>
   );

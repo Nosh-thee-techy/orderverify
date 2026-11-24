@@ -1,13 +1,12 @@
 /**
  * apps/web/src/components/marketing/StartVerifyingButton.tsx
- * Landing CTA: signed-out visitors go to sign-up (which also links to sign-in).
- * Signed-in sellers go straight to the check wizard.
+ * Landing CTA. Always renders a button: sign-up when signed out, dashboard when signed in.
+ * Uses useAuth so the control stays visible while Clerk hydrates (Show hid the signed-in state).
  */
 "use client";
 
-import { Show } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { ArrowRight } from "lucide-react";
-import { Suspense } from "react";
 import { useI18n } from "@/i18n";
 import { Button } from "./Button";
 
@@ -25,30 +24,13 @@ export function StartVerifyingButton({
   className?: string;
 }) {
   const { t } = useI18n();
-  const label = (
-    <>
-      {t.landing.nav.startVerifying}
-      <ArrowRight className="h-4 w-4" aria-hidden />
-    </>
-  );
+  const { isSignedIn } = useAuth();
+  const href = isSignedIn ? "/dashboard" : "/sign-up";
+  const label = isSignedIn ? t.goToDashboard : t.landing.nav.startVerifying;
   return (
-    <Suspense
-      fallback={
-        <Button href="/sign-up" variant={variant} size="lg" className={className}>
-          {label}
-        </Button>
-      }
-    >
-      <Show when="signed-out">
-        <Button href="/sign-up" variant={variant} size="lg" className={className}>
-          {label}
-        </Button>
-      </Show>
-      <Show when="signed-in">
-        <Button href="/check" variant={variant} size="lg" className={className}>
-          {label}
-        </Button>
-      </Show>
-    </Suspense>
+    <Button href={href} variant={variant} size="lg" className={className}>
+      {label}
+      <ArrowRight className="h-4 w-4" aria-hidden />
+    </Button>
   );
 }

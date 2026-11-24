@@ -20,7 +20,7 @@ const csp = [
   `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${clerkCsp}`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
-  `img-src 'self' data: blob: https://img.clerk.com https://*.clerk.com`,
+  `img-src 'self' data: blob: https://img.clerk.com https://images.clerk.dev https://*.clerk.com https://*.clerk.accounts.dev`,
   `connect-src 'self' ${clerkCsp} https://clerk-telemetry.com`,
   `frame-src ${clerkCsp}`,
   "worker-src 'self' blob:",

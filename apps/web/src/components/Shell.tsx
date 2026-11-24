@@ -14,6 +14,7 @@ import { LanguageMenu } from "@/components/LanguageMenu";
 import { Logo } from "@/components/marketing/Logo";
 import { clerkAppearance } from "@/lib/clerkAppearance";
 import { cn } from "@/lib/cn";
+import { clerkDisplayName } from "@/lib/sellerName";
 import { useI18n } from "@/i18n";
 
 const tabs = [
@@ -34,8 +35,8 @@ export function AppShell({ children, bypass }: { children: React.ReactNode; bypa
   const hideNav = path.includes("/activity") || path.startsWith("/dev");
   const { t } = useI18n();
   const { user } = useUser();
+  const displayName = clerkDisplayName(user);
   const [open, setOpen] = useState(false);
-  const [displayName, setDisplayName] = useState("");
   const drawerId = useId();
   const drawerRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -44,16 +45,6 @@ export function AppShell({ children, bypass }: { children: React.ReactNode; bypa
   useEffect(() => {
     setOpen(false);
   }, [path]);
-
-  // Existing GET /api/seller — displayName only, never invent an avatar photo.
-  useEffect(() => {
-    void fetch("/api/seller")
-      .then((response) => response.json())
-      .then((body: { displayName?: string }) => {
-        if (typeof body.displayName === "string") setDisplayName(body.displayName);
-      })
-      .catch(() => undefined);
-  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -112,7 +103,7 @@ export function AppShell({ children, bypass }: { children: React.ReactNode; bypa
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-[#F0E2C8] bg-white/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
+          <header className="sticky top-0 z-30 flex min-h-16 items-center gap-3 border-b border-[#F0E2C8] bg-white/90 px-4 py-2 backdrop-blur-md sm:px-6 lg:px-8">
             {hideNav ? null : (
               <button
                 ref={triggerRef}
@@ -127,15 +118,23 @@ export function AppShell({ children, bypass }: { children: React.ReactNode; bypa
               </button>
             )}
             <Logo href="/dashboard" className="lg:hidden" />
-            <div className="ml-auto flex items-center gap-3">
-              {(() => {
-                const name =
-                  user?.fullName?.trim() ||
-                  user?.primaryEmailAddress?.emailAddress?.split("@")[0] ||
-                  displayName;
-                return name ? <UserChip name={name} /> : null;
-              })()}
-              <UserButton appearance={clerkAppearance} />
+            <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
+              {displayName ? (
+                <span className="min-w-0 break-words text-right text-sm font-medium leading-tight text-brand-ink">
+                  {displayName}
+                </span>
+              ) : null}
+              <div className="shrink-0">
+                <UserButton
+                  appearance={{
+                    ...clerkAppearance,
+                    elements: {
+                      ...clerkAppearance.elements,
+                      avatarBox: "h-9 w-9",
+                    },
+                  }}
+                />
+              </div>
             </div>
           </header>
 
@@ -183,38 +182,6 @@ export function AppShell({ children, bypass }: { children: React.ReactNode; bypa
       ) : null}
     </div>
   );
-}
-
-/**
- * Initials from a real displayName. No placeholder photo.
- *
- * @param name - Seller display name from GET /api/seller
- */
-function UserChip({ name }: { name: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-sunset text-xs font-semibold text-white"
-        aria-hidden
-      >
-        {initials(name)}
-      </span>
-      <span className="hidden max-w-[10rem] truncate text-sm font-medium text-brand-ink sm:inline">{name}</span>
-    </div>
-  );
-}
-
-/**
- * Two-letter initials for the avatar circle.
- *
- * @param name - Display name
- * @returns Up to two uppercase letters
- */
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "";
-  if (parts.length === 1) return parts[0]!.slice(0, 2).toUpperCase();
-  return `${parts[0]![0] ?? ""}${parts[parts.length - 1]![0] ?? ""}`.toUpperCase();
 }
 
 /**

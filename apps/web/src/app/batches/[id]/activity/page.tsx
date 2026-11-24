@@ -36,6 +36,17 @@ export default function ActivityPage() {
     let stopped = false;
     let after = 0;
     async function start() {
+      // History and reloads must not pay again. If this batch already has a
+      // stored report, show it and skip the paid run.
+      const existing = await fetch(`/api/batches/${params.id}`);
+      if (existing.ok) {
+        const body = (await existing.json()) as ReportPayload & { batch?: { status?: string } };
+        if (body.report) {
+          setStatus(body.batch?.status === "done" ? "done" : body.batch?.status ?? "done");
+          setPayload(body);
+          return;
+        }
+      }
       const run = await fetch(`/api/batches/${params.id}/run`, { method: "POST" });
       const body = await run.json();
       if (!run.ok && body.error) {
@@ -84,19 +95,6 @@ export default function ActivityPage() {
 
   const snapshot = useMemo(() => trackerFromEvents(events, status), [events, status]);
 
-  async function decide(orderId: string, decision: "released" | "held" | "more_info") {
-    await fetch(`/api/orders/${orderId}/decision`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ decision }),
-    });
-    const response = await fetch(`/api/batches/${params.id}`);
-    if (response.ok) {
-      const body = (await response.json()) as ReportPayload;
-      if (body.report) setPayload(body);
-    }
-  }
-
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {payload ? null : <VerificationTracker snapshot={snapshot} t={t} />}
@@ -125,7 +123,7 @@ export default function ActivityPage() {
         </details>
       ) : null}
 
-      {payload ? <VerificationReport payload={payload} onDecide={decide} /> : null}
+      {payload ? <VerificationReport payload={payload} /> : null}
 
       {status !== "done" ? (
         <div className="flex gap-2">

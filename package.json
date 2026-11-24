@@ -14,6 +14,7 @@
     "dev:api": "npm run dev -w @orderverify/verify-api",
     "test": "vitest run",
     "eval": "tsx scripts/run-eval.ts",
+    "system-check": "tsx scripts/system-check.ts",
     "lint": "eslint .",
     "typecheck": "tsc -p packages/engine --noEmit && tsc -p packages/fixtures --noEmit && tsc -p services/verify-api --noEmit && tsc -p apps/web --noEmit",
     "check:secrets": "node scripts/check-client-secrets.mjs",

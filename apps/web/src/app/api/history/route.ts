@@ -3,10 +3,11 @@
  * Paginated history for the signed-in seller. Search hashes the query and also
  * does a decrypted substring match limited to this seller's rows.
  */
-import { desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { decryptOrEmpty, hashCode, hashName, hashPhone } from "@/server/crypto";
-import { sellerOrLimit } from "@/server/api";
+import { readJson, sellerOrLimit } from "@/server/api";
 import { getDb } from "@/server/db/client";
 import { batches, mpesaRecords, orders, reports } from "@/server/db/schema";
 import { revealOrder } from "@/server/reveal";
@@ -107,6 +108,7 @@ export async function GET(request: Request) {
           total: list.length,
         },
         reportCounts: report?.counts,
+        hasReport: Boolean(report),
         preview: list.slice(0, 3).map((item) => ({
           id: item.id,
           customerName: item.customerName,
@@ -126,4 +128,43 @@ export async function GET(request: Request) {
     total: batchesOut.length,
     batches: slice,
   });
+}
+
+const deleteSchema = z
+  .object({
+    all: z.boolean().optional(),
+    batchIds: z.array(z.string().uuid()).max(50).optional(),
+  })
+  .refine((body) => body.all === true || (body.batchIds && body.batchIds.length > 0), {
+    message: "Select at least one report, or delete all.",
+  });
+
+/**
+ * DELETE { all: true } or { batchIds: string[] }.
+ * Only this seller's batches are removed. Cascades to orders, reports, and M-Pesa rows.
+ */
+export async function DELETE(request: Request) {
+  const gate = await sellerOrLimit();
+  if ("response" in gate) return gate.response;
+  const body = await readJson(request, 20_000);
+  if ("response" in body) return body.response;
+  const parsed = deleteSchema.safeParse(body.json);
+  if (!parsed.success) return NextResponse.json({ error: "invalid_body" }, { status: 400 });
+
+  const db = getDb();
+  const sellerId = gate.seller.id;
+  if (parsed.data.all) {
+    const removed = await db.delete(batches).where(eq(batches.sellerId, sellerId)).returning({ id: batches.id });
+    return NextResponse.json({ deleted: removed.length, all: true });
+  }
+
+  const ids = [...new Set(parsed.data.batchIds ?? [])];
+  const owned = await db
+    .select({ id: batches.id })
+    .from(batches)
+    .where(and(eq(batches.sellerId, sellerId), inArray(batches.id, ids)));
+  const ownedIds = owned.map((row) => row.id);
+  if (ownedIds.length === 0) return NextResponse.json({ deleted: 0 });
+  await db.delete(batches).where(and(eq(batches.sellerId, sellerId), inArray(batches.id, ownedIds)));
+  return NextResponse.json({ deleted: ownedIds.length, all: false });
 }

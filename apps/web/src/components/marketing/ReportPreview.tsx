@@ -125,7 +125,7 @@ export function ReportPreview() {
   const preview = t.landing.reportPreview;
   return (
     <Section width="wide" className="scroll-mt-24">
-      <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16 xl:gap-20">
+      <div className="marketing-stagger grid items-center gap-12 lg:grid-cols-2 lg:gap-16 xl:gap-20">
         <ReportWindow />
         <div>
           <SectionHeading eyebrow={preview.eyebrow} title={preview.title} description={preview.description} />

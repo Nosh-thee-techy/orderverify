@@ -30,7 +30,7 @@ export function WhyChoose() {
     <Section id="why-orderverify" width="wide" tone="surface" className="scroll-mt-24">
       <SectionHeading align="center" title={why.title} />
 
-      <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-6">
+      <ul className="marketing-stagger mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-6">
         {cardMeta.map((card, index) => {
           const Icon = card.icon;
           const copy = why.cards[index];

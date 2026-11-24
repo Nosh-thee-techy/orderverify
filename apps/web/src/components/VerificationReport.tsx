@@ -1,21 +1,21 @@
 /**
  * apps/web/src/components/VerificationReport.tsx
- * On-screen payment verification report. Same underlying document as the
- * email and the PDF. Verdicts are displayed, never recalculated here.
+ * On-screen payment verification report: payment details, status, and reason.
+ * The PDF and email still include the full check list. Verdicts are displayed,
+ * never recalculated here.
  */
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Download, Mail, X } from "lucide-react";
-import type { BatchReport, Verdict } from "@orderverify/engine";
-import { CheckRow, LimitsPanel, ReplyDrafts } from "@/components/bits";
+import type { BatchReport } from "@orderverify/engine";
 import { Logo } from "@/components/marketing/Logo";
 import { VerdictBadge } from "@/components/VerdictBadge";
 import { useI18n } from "@/i18n";
 import { formatKes, formatWhen } from "@/lib/format";
 import { cn } from "@/lib/cn";
-import { buildReportDocument, groupReportOrders, pdfFilename, type ReportOrderLine } from "@/lib/reportDocument";
+import { buildReportDocument, pdfFilename, type ReportOrderLine } from "@/lib/reportDocument";
 
 export interface ReportPayload {
   batch: { id: string; status: string; evidenceTier: string; errorCode: string | null; createdAt?: string };
@@ -40,18 +40,8 @@ export interface ReportPayload {
  * Full-page report viewer with Download, Send to Email, and Close.
  *
  * @param props.payload - Stored batch + engine report
- * @param props.onDecide - Optional existing release/hold decision handler
- * @param props.onDismissCross - Optional "this is fine" handler for a cross-shop flag
  */
-export function VerificationReport({
-  payload,
-  onDecide,
-  onDismissCross,
-}: {
-  payload: ReportPayload;
-  onDecide?: (orderId: string, decision: "released" | "held" | "more_info") => Promise<void>;
-  onDismissCross?: (orderId: string) => Promise<void>;
-}) {
+export function VerificationReport({ payload }: { payload: ReportPayload }) {
   const { t, lang } = useI18n();
   const router = useRouter();
   const doc = useMemo(
@@ -63,8 +53,6 @@ export function VerificationReport({
       ),
     [payload.report, payload.orders, lang],
   );
-  const grouped = groupReportOrders(doc.orders);
-  const [confirmBulk, setConfirmBulk] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState("");
   const [emailOpen, setEmailOpen] = useState(false);
@@ -235,53 +223,10 @@ export function VerificationReport({
             <h2 className="font-display text-lg font-semibold text-brand-ink">{t.results}</h2>
             <ul className="mt-4 divide-y divide-[#F0E2C8] overflow-hidden rounded-brand-card border border-[#F0E2C8]">
               {doc.orders.map((order) => (
-                <OrderBlock
-                  key={order.orderId}
-                  order={order}
-                  source={payload.orders.find((item) => item.id === order.orderId)}
-                  draft={payload.drafts?.[order.orderId]}
-                  onDecide={onDecide}
-                  onDismissCross={onDismissCross}
-                />
+                <OrderBlock key={order.orderId} order={order} />
               ))}
             </ul>
           </section>
-
-          <Findings grouped={grouped} />
-
-          {onDecide ? (
-            <div>
-              <button
-                type="button"
-                className="min-h-12 w-full rounded-brand-control border border-brand-orange text-brand-orange"
-                onClick={() => setConfirmBulk(true)}
-                disabled={!doc.orders.some((order) => order.verdict === "RELEASE")}
-              >
-                {t.releaseConsistent}
-              </button>
-              {confirmBulk ? (
-                <div className="mt-3 rounded-brand-card border border-[#F0E2C8] bg-brand-bg p-4" role="dialog" aria-modal="true">
-                  <p>{t.releaseConfirm}</p>
-                  <div className="mt-3 flex gap-2">
-                    <button
-                      type="button"
-                      className="min-h-12 flex-1 rounded-brand-control bg-brand-orange text-white"
-                      onClick={() => {
-                        void Promise.all(
-                          doc.orders.filter((order) => order.verdict === "RELEASE").map((order) => onDecide(order.orderId, "released")),
-                        ).then(() => setConfirmBulk(false));
-                      }}
-                    >
-                      {t.confirm}
-                    </button>
-                    <button type="button" className="min-h-12 flex-1 rounded-control border border-line" onClick={() => setConfirmBulk(false)}>
-                      {t.cancel}
-                    </button>
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
 
           {doc.unmatchedPayments.length > 0 ? (
             <section>
@@ -305,8 +250,6 @@ export function VerificationReport({
           </p>
         </footer>
       </article>
-
-      <LimitsPanel />
     </div>
   );
 }
@@ -328,19 +271,7 @@ function SummaryCard({ label, value, tone }: { label: string; value: number; ton
   );
 }
 
-function OrderBlock({
-  order,
-  source,
-  draft,
-  onDecide,
-  onDismissCross,
-}: {
-  order: ReportOrderLine;
-  source?: ReportPayload["orders"][number];
-  draft?: { en: string; sw: string };
-  onDecide?: (orderId: string, decision: "released" | "held" | "more_info") => Promise<void>;
-  onDismissCross?: (orderId: string) => Promise<void>;
-}) {
+function OrderBlock({ order }: { order: ReportOrderLine }) {
   const { t, lang } = useI18n();
   return (
     <li className="bg-white px-4 py-4 sm:px-5">
@@ -365,61 +296,7 @@ function OrderBlock({
         </div>
       </dl>
       <p className="mt-3 text-sm leading-relaxed text-brand-ink">{order.explanation}</p>
-      <div className="mt-3 space-y-2">
-        {order.checks.map((check) => (
-          <CheckRow key={`${check.title}-${check.status}`} title={check.title} plain={check.plain} status={check.status} evidence={check.evidence} />
-        ))}
-      </div>
-      {onDecide ? (
-        <div className="mt-3 flex flex-wrap gap-2">
-          <button type="button" className="min-h-12 rounded-brand-control bg-brand-orange px-3 text-sm font-medium text-white" onClick={() => void onDecide(order.orderId, "released")}>
-            {t.release}
-          </button>
-          <button type="button" className="min-h-12 rounded-control border border-line px-3 text-sm" onClick={() => void onDecide(order.orderId, "held")}>
-            {t.keepHold}
-          </button>
-          {onDismissCross && source?.reasons?.some((reason) => reason.id.startsWith("CROSS_SHOP")) && !source.dismissedCrossFlag ? (
-            <button type="button" className="min-h-12 rounded-brand-control border border-[#F0E2C8] bg-white px-3 text-sm" onClick={() => void onDismissCross(order.orderId)}>
-              {t.thisIsFine}
-            </button>
-          ) : null}
-        </div>
-      ) : null}
-      {draft ? <div className="mt-3"><ReplyDrafts en={draft.en} swahili={draft.sw} /></div> : null}
-      {source?.sellerDecision ? <p className="mt-2 text-xs uppercase text-brand-muted">{source.sellerDecision}</p> : null}
     </li>
-  );
-}
-
-function Findings({ grouped }: { grouped: Record<Verdict, ReportOrderLine[]> }) {
-  const { t } = useI18n();
-  const sections: { key: Verdict; title: string; className: string }[] = [
-    { key: "RELEASE", title: t.findingsRelease, className: "border-[#F0E2C8] bg-[#FFF8E4]" },
-    { key: "REVIEW", title: t.findingsReview, className: "border-[#E3EBFF] bg-[#F5F8FF]" },
-    { key: "HOLD", title: t.findingsHold, className: "border-[#FBE0E4] bg-[#FDF5F6]" },
-  ];
-  return (
-    <section className="space-y-4">
-      <h2 className="font-display text-lg font-semibold text-brand-ink">{t.findingsTitle}</h2>
-      {sections.map((section) => {
-        const items = grouped[section.key];
-        if (items.length === 0) return null;
-        return (
-          <div key={section.key} className={cn("rounded-brand-card border px-4 py-4", section.className)}>
-            <h3 className="font-semibold text-brand-ink">{section.title}</h3>
-            <ul className="mt-2 space-y-2 text-sm text-brand-ink">
-              {items.map((item) => (
-                <li key={item.orderId}>
-                  <span className="font-medium">{item.customerName}</span>
-                  {" — "}
-                  <span className="text-brand-muted">{item.explanation}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      })}
-    </section>
   );
 }
 

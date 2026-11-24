@@ -29,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className={`${sans.variable} ${display.variable} ${mono.variable} font-sans antialiased`}>
-        <ClerkProvider appearance={clerkAppearance}>
+        <ClerkProvider appearance={clerkAppearance} dynamic afterSignOutUrl="/">
           <Providers>{children}</Providers>
         </ClerkProvider>
       </body>

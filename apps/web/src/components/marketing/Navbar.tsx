@@ -83,7 +83,7 @@ export function Navbar() {
     <header
       id="top"
       className={cn(
-        "sticky top-0 z-50 transition-[background-color,border-color,box-shadow] duration-200 ease-brand",
+        "marketing-nav-in sticky top-0 z-50 transition-[background-color,border-color,box-shadow] duration-200 ease-brand",
         scrolled
           ? "border-b border-[#F0E2C8] bg-brand-bg/92 shadow-brand-sm backdrop-blur-md"
           : "border-b border-transparent bg-brand-bg/80",
@@ -140,7 +140,7 @@ export function Navbar() {
             role="dialog"
             aria-modal="true"
             aria-labelledby={`${menuId}-title`}
-            className="fixed inset-y-0 right-0 z-[70] flex w-[min(22rem,100%)] flex-col bg-brand-bg shadow-brand-lg"
+            className="marketing-drawer-in fixed inset-y-0 right-0 z-[70] flex w-[min(22rem,100%)] flex-col bg-brand-bg shadow-brand-lg"
           >
             <div className="flex h-[4.25rem] items-center justify-between px-5">
               <p id={`${menuId}-title`} className="font-semibold tracking-tight">

@@ -4,6 +4,7 @@
  */
 import { cn } from "@/lib/cn";
 import { Container } from "./Container";
+import { Reveal } from "./Reveal";
 
 /**
  * A full-width landing band with consistent padding and an inner container.
@@ -34,7 +35,7 @@ export function Section({
   return (
     <section id={id} className={cn("py-section-sm sm:py-section lg:py-section-lg", toneClass, className)}>
       <Container width={width} className={innerClassName}>
-        {children}
+        <Reveal>{children}</Reveal>
       </Container>
     </section>
   );

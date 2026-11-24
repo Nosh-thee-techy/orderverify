@@ -28,20 +28,6 @@ export default function ResultsPage() {
     void load();
   }, [params.id]);
 
-  async function decide(orderId: string, decision: "released" | "held" | "more_info") {
-    await fetch(`/api/orders/${orderId}/decision`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ decision }),
-    });
-    await load();
-  }
-
-  async function dismissCross(orderId: string) {
-    await fetch(`/api/orders/${orderId}/dismiss-cross`, { method: "POST" });
-    await load();
-  }
-
   if (!data) {
     return (
       <div className="mx-auto max-w-4xl">
@@ -53,7 +39,7 @@ export default function ResultsPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <VerificationReport payload={data} onDecide={decide} onDismissCross={dismissCross} />
+      <VerificationReport payload={data} />
     </div>
   );
 }

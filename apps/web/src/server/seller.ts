@@ -7,27 +7,16 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { clerkDisplayName } from "@/lib/sellerName";
 import { getDb } from "./db/client.js";
 import { sellers } from "./db/schema.js";
 
 export type Seller = typeof sellers.$inferSelect;
 
 /**
- * Build the display name Clerk should show in the greeting.
- * @param fullName - Clerk fullName
- * @param email - Primary email
- * @returns Full name, or the email prefix, or "Seller"
- */
-export function sellerDisplayName(fullName: string | null | undefined, email: string | null | undefined): string {
-  const name = fullName?.trim();
-  if (name) return name;
-  const prefix = email?.split("@")[0]?.trim();
-  if (prefix) return prefix;
-  return "Seller";
-}
-
-/**
  * Insert or refresh the sellers row for this Clerk user.
+ * A later request that has no Clerk name must not overwrite a name we already stored.
+ *
  * @param userId - Clerk user id (primary key)
  * @returns The sellers row
  */
@@ -35,21 +24,23 @@ export async function upsertSellerForUserId(userId: string): Promise<Seller> {
   const db = getDb();
   const user = await currentUser();
   const email = user?.emailAddresses[0]?.emailAddress ?? "";
-  const displayName = sellerDisplayName(user?.fullName, email);
+  const clerkName = clerkDisplayName(user);
   const existing = await db.select().from(sellers).where(eq(sellers.id, userId)).limit(1);
   if (existing[0]) {
-    const [updated] = await db
-      .update(sellers)
-      .set({ displayName, email: email || existing[0].email })
-      .where(eq(sellers.id, userId))
-      .returning();
+    const patch: { displayName?: string; email?: string } = {};
+    // Only write a name when Clerk actually sent one. Empty currentUser() used to
+    // replace the greeting with a blank or "Seller" after leaving Today.
+    if (clerkName && clerkName !== existing[0].displayName) patch.displayName = clerkName;
+    if (email && email !== existing[0].email) patch.email = email;
+    if (Object.keys(patch).length === 0) return existing[0];
+    const [updated] = await db.update(sellers).set(patch).where(eq(sellers.id, userId)).returning();
     return updated ?? existing[0];
   }
   const created = await db
     .insert(sellers)
     .values({
       id: userId,
-      displayName,
+      displayName: clerkName || "Seller",
       email,
       language: "en",
       weeklyCapKes: Number(process.env.DEFAULT_WEEKLY_CAP_KES ?? 50),
