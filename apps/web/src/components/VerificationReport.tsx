@@ -9,7 +9,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Download, Mail, X } from "lucide-react";
-import type { BatchReport } from "@orderverify/engine";
+import type { BatchReport, Verdict } from "@orderverify/engine";
 import { Logo } from "@/components/marketing/Logo";
 import { VerdictBadge } from "@/components/VerdictBadge";
 import { useI18n } from "@/i18n";
@@ -70,7 +70,7 @@ export function VerificationReport({ payload }: { payload: ReportPayload }) {
    * @param orderId - Order that owns the flag
    * @returns New verdict, or null on failure
    */
-  async function dismissCrossShop(orderId: string): Promise<string | null> {
+  async function dismissCrossShop(orderId: string): Promise<Verdict | null> {
     const response = await fetch(`/api/orders/${encodeURIComponent(orderId)}/dismiss-cross`, {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -80,13 +80,16 @@ export function VerificationReport({ payload }: { payload: ReportPayload }) {
     const body = (await response.json()) as { verdict?: string };
     const verdict = body.verdict;
     if (verdict !== "RELEASE" && verdict !== "REVIEW" && verdict !== "HOLD") return null;
+    const nextVerdict: Verdict = verdict;
     setOrders((current) =>
       current.map((order) =>
-        order.id === orderId ? { ...order, dismissedCrossFlag: true, reasons: [], verdict } : order,
+        order.id === orderId ? { ...order, dismissedCrossFlag: true, reasons: [], verdict: nextVerdict } : order,
       ),
     );
     setReport((current) => {
-      const nextOrders = current.orders.map((item) => (item.orderId === orderId ? { ...item, verdict } : item));
+      const nextOrders = current.orders.map((item) =>
+        item.orderId === orderId ? { ...item, verdict: nextVerdict } : item,
+      );
       const counts = { release: 0, review: 0, hold: 0 };
       let moneyHeldKes = 0;
       for (const item of nextOrders) {
@@ -98,7 +101,7 @@ export function VerificationReport({ payload }: { payload: ReportPayload }) {
       }
       return { ...current, orders: nextOrders, counts, moneyHeldKes };
     });
-    return verdict;
+    return nextVerdict;
   }
 
   useEffect(() => {
@@ -337,7 +340,7 @@ function OrderBlock({
 }: {
   order: ReportOrderLine;
   showDismiss?: boolean;
-  onDismiss?: () => Promise<string | null>;
+  onDismiss?: () => Promise<Verdict | null>;
 }) {
   const { t, lang } = useI18n();
   const [confirmOpen, setConfirmOpen] = useState(false);
