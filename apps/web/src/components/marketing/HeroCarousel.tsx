@@ -6,12 +6,11 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import { ArrowRight } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { Button } from "./Button";
 import { Container } from "./Container";
-
+import { StartVerifyingButton } from "./StartVerifyingButton";
 
 const AUTO_MS = 6500;
 
@@ -113,10 +112,7 @@ export function HeroCarousel() {
             </h1>
             <p className="mt-4 max-w-lg text-base leading-relaxed text-white/85 sm:text-lg">{activeCopy.description}</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Button href="/check" size="lg" className="w-full sm:w-auto">
-                {t.landing.nav.startVerifying}
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </Button>
+              <StartVerifyingButton className="w-full sm:w-auto" />
               <Button href="#how-it-works" variant="secondaryOnDark" size="lg" className="w-full sm:w-auto">
                 {copy.seeHow}
               </Button>
@@ -143,7 +139,7 @@ function SlideDots({
   onSelect,
 }: {
   index: number;
-  copy: { showSlide: string; slides: Record<string, { headline: string }> };
+  copy: { showSlide: string; slideOf: string; slides: Record<string, { headline: string }> };
   onSelect: (slideIndex: number) => void;
 }) {
   return (

@@ -6,7 +6,9 @@
  */
 "use client";
 
+import { Show } from "@clerk/nextjs";
 import Link from "next/link";
+import { Suspense } from "react";
 import { useI18n } from "@/i18n";
 import { Container } from "./Container";
 import { Logo } from "./Logo";
@@ -51,7 +53,7 @@ export function Footer() {
     { href: "#why-orderverify", label: nav.why },
     { href: "#faq-eval", label: nav.faq },
   ];
-  const startLinks = [{ href: "/check", label: nav.startVerifying }];
+  const startLabel = nav.startVerifying;
 
   return (
     <footer className="relative overflow-hidden border-t border-[#F0E2C8] bg-white">
@@ -80,11 +82,16 @@ export function Footer() {
           <nav aria-label={footer.start}>
             <p className="text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-brand-tangerine">{footer.start}</p>
             <ul className="mt-3 flex flex-col">
-              {startLinks.map((link) => (
-                <li key={link.href}>
-                  <FooterLink href={link.href} label={link.label} />
-                </li>
-              ))}
+              <li>
+                <Suspense fallback={<FooterLink href="/sign-up" label={startLabel} />}>
+                  <Show when="signed-out">
+                    <FooterLink href="/sign-up" label={startLabel} />
+                  </Show>
+                  <Show when="signed-in">
+                    <FooterLink href="/check" label={startLabel} />
+                  </Show>
+                </Suspense>
+              </li>
             </ul>
           </nav>
         </div>

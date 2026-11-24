@@ -4,10 +4,9 @@
  */
 "use client";
 
-import { ArrowRight } from "lucide-react";
 import { useI18n } from "@/i18n";
-import { Button } from "./Button";
 import { Container } from "./Container";
+import { StartVerifyingButton } from "./StartVerifyingButton";
 
 /**
  * Closing call-to-action band for the public landing page.
@@ -47,10 +46,7 @@ export function FinalCta() {
             </h2>
             <p className="mt-4 max-w-xl text-base leading-relaxed text-white/90 sm:text-lg">{t.landing.cta.body}</p>
           </div>
-          <Button href="/check" variant="dark" size="lg" className="marketing-rise w-full shadow-brand-lg sm:w-auto [animation-delay:120ms]">
-            {t.landing.nav.startVerifying}
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </Button>
+          <StartVerifyingButton variant="dark" className="marketing-rise w-full shadow-brand-lg sm:w-auto [animation-delay:120ms]" />
         </div>
       </Container>
     </section>
