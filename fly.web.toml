@@ -5,6 +5,32 @@ primary_region = "jnb"
 
 [build]
   dockerfile = "Dockerfile.web"
+  [build.args]
+    # Publishable Clerk key is public by design; secret key stays in fly secrets.
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY = "pk_test_b3JnYW5pYy1mbHktMjYyNS5jbGVyay5hY2NvdW50cy5kZXYk"
+    NEXT_PUBLIC_CLERK_SIGN_IN_URL = "/sign-in"
+    NEXT_PUBLIC_CLERK_SIGN_UP_URL = "/sign-up"
+    NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL = "/dashboard"
+    NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL = "/dashboard"
+    NEXT_PUBLIC_APP_URL = "https://ov-ke-web.fly.dev"
+
+[env]
+  NODE_ENV = "production"
+  NEXT_PUBLIC_APP_URL = "https://ov-ke-web.fly.dev"
+  X402_MODE = "live"
+  STELLAR_NETWORK = "stellar:testnet"
+  PRICE_USD = "0.01"
+  MAX_ORDERS_PER_BATCH = "50"
+  KES_PER_USD = "129"
+  DEFAULT_WEEKLY_CAP_KES = "50"
+  RETENTION_DAYS = "7"
+  KEEP_RECORDS_DAYS = "365"
+  ANTHROPIC_MODEL = "claude-sonnet-5-5"
+  VERIFY_API_URL = "https://ov-ke-api.fly.dev"
+  NEXT_PUBLIC_CLERK_SIGN_IN_URL = "/sign-in"
+  NEXT_PUBLIC_CLERK_SIGN_UP_URL = "/sign-up"
+  NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL = "/dashboard"
+  NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL = "/dashboard"
 
 [http_service]
   internal_port = 3000

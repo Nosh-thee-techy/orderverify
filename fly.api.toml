@@ -6,6 +6,15 @@ primary_region = "jnb"
 [build]
   dockerfile = "Dockerfile.api"
 
+[env]
+  NODE_ENV = "production"
+  PORT = "8080"
+  X402_MODE = "live"
+  STELLAR_NETWORK = "stellar:testnet"
+  PRICE_USD = "0.01"
+  MAX_ORDERS_PER_BATCH = "50"
+  FACILITATOR_URL = "https://channels.openzeppelin.com/x402/testnet"
+
 [http_service]
   internal_port = 8080
   force_https = true

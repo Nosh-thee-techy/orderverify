@@ -29,7 +29,7 @@ export function HowItWorks() {
     <Section id="how-it-works" width="wide" tone="surface" className="scroll-mt-24">
       <SectionHeading align="center" eyebrow={how.eyebrow} title={how.title} description={how.description} />
 
-      <ol className="mt-12 grid gap-10 sm:mt-14 sm:gap-12 lg:grid-cols-2 lg:gap-10 xl:grid-cols-4 xl:gap-6">
+      <ol className="marketing-stagger mt-12 grid gap-10 sm:mt-14 sm:gap-12 lg:grid-cols-2 lg:gap-10 xl:grid-cols-4 xl:gap-6">
         {stepMeta.map((step, index) => {
           const Icon = step.icon;
           const copy = how.steps[index];
@@ -37,7 +37,7 @@ export function HowItWorks() {
           if (!copy) return null;
 
           return (
-            <li key={step.number} className="relative flex flex-col items-center text-center">
+            <li key={step.number} className="group relative flex flex-col items-center text-center">
               {/* Desktop connector from this icon to the next. */}
               {last ? null : (
                 <span
@@ -51,7 +51,7 @@ export function HowItWorks() {
               <p className="marketing-kicker">{step.number}</p>
               <span
                 className={cn(
-                  "mt-3 flex h-[4.25rem] w-[4.25rem] items-center justify-center rounded-full shadow-brand-sm",
+                  "mt-3 flex h-[4.25rem] w-[4.25rem] items-center justify-center rounded-full shadow-brand-sm transition-transform duration-200 ease-brand group-hover:scale-105",
                   step.iconClass,
                 )}
               >

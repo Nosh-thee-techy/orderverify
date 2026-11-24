@@ -6,12 +6,11 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import { ArrowRight } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { Button } from "./Button";
 import { Container } from "./Container";
-
+import { StartVerifyingButton } from "./StartVerifyingButton";
 
 const AUTO_MS = 6500;
 
@@ -72,7 +71,7 @@ export function HeroCarousel() {
       aria-roledescription="carousel"
       aria-labelledby={`${regionId}-title`}
     >
-      <div className="relative w-full min-h-[max(32rem,calc(100svh-4.5rem))]">
+      <div className="relative w-full min-h-[max(32rem,calc(100svh-4.5rem))] overflow-hidden">
         {slides.map((slide, slideIndex) => {
           const visible = slideIndex === index;
           return (
@@ -87,6 +86,7 @@ export function HeroCarousel() {
                 slide.positionClass,
                 reduceMotion ? "transition-none" : "transition-opacity duration-700 ease-brand",
                 visible ? "opacity-100" : "opacity-0",
+                visible && !reduceMotion && "marketing-hero-kenburns",
               )}
               style={{
                 backgroundImage: `url(${slide.image})`,
@@ -103,8 +103,7 @@ export function HeroCarousel() {
         />
 
         <Container width="wide" className="relative flex min-h-[max(32rem,calc(100svh-4.5rem))] items-end pb-28 pt-12 md:items-center md:pb-28 md:pt-16 min-[1440px]:pb-24">
-          <div className="max-w-xl text-white md:max-w-2xl">
-
+          <div key={active.id} className="marketing-hero-copy max-w-xl text-white md:max-w-2xl">
             <h1
               id={`${regionId}-title`}
               className="mt-3 font-display text-[2.15rem] font-semibold leading-[1.08] tracking-tight sm:text-display-lg lg:text-display-xl"
@@ -113,10 +112,7 @@ export function HeroCarousel() {
             </h1>
             <p className="mt-4 max-w-lg text-base leading-relaxed text-white/85 sm:text-lg">{activeCopy.description}</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <Button href="/check" size="lg" className="w-full sm:w-auto">
-                {t.landing.nav.startVerifying}
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </Button>
+              <StartVerifyingButton className="w-full sm:w-auto" />
               <Button href="#how-it-works" variant="secondaryOnDark" size="lg" className="w-full sm:w-auto">
                 {copy.seeHow}
               </Button>

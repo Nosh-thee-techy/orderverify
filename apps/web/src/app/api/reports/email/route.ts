@@ -2,14 +2,16 @@
  * apps/web/src/app/api/reports/email/route.ts
  * Email a finished batch report via Resend, and remember the send in memory.
  */
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { z } from "zod";
 import type { BatchReport } from "@orderverify/engine";
 import { readJson, sellerOrLimit } from "@/server/api";
 import { getDb } from "@/server/db/client";
-import { batches, orders, reports } from "@/server/db/schema";
+import { orders, reports } from "@/server/db/schema";
+import { loadOwnedBatch } from "@/server/ownership";
+import { revealOrder } from "@/server/reveal";
 import { historyFor, lastEmailFor, rememberReport } from "@/server/reportHistory";
 import { renderReportEmail } from "@/server/reportEmail";
 
@@ -32,16 +34,13 @@ export async function POST(request: Request) {
 
   const { batchId, email } = parsed.data;
   const db = getDb();
-  const [batch] = await db
-    .select()
-    .from(batches)
-    .where(and(eq(batches.id, batchId), eq(batches.sellerId, gate.seller.id)))
-    .limit(1);
+  const batch = await loadOwnedBatch(gate.seller.id, batchId);
   if (!batch) return NextResponse.json({ error: "not_found" }, { status: 404 });
   const [reportRow] = await db.select().from(reports).where(eq(reports.batchId, batchId)).limit(1);
   const report = (reportRow?.report ?? null) as BatchReport | null;
   if (!report) return NextResponse.json({ error: "report_not_ready" }, { status: 409 });
   const orderRows = await db.select().from(orders).where(eq(orders.batchId, batchId));
+  const revealed = orderRows.map(revealOrder);
   const lang = gate.seller.language === "sw" ? "sw" : "en";
 
   const apiKey = process.env.RESEND_API_KEY;
@@ -60,7 +59,7 @@ export async function POST(request: Request) {
         subject: `OrderVerify · ${shortRef(batchId)} · ${report.counts.hold} hold, ${report.counts.review} review, ${report.counts.release} release`,
         html: renderReportEmail(
           report,
-          orderRows.map((order) => ({ id: order.id, customerName: order.customerName, claimedCode: order.claimedCode })),
+          revealed.map((order) => ({ id: order.id, customerName: order.customerName, claimedCode: order.claimedCode })),
           lang,
         ),
       });

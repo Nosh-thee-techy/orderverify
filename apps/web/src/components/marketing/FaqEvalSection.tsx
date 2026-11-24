@@ -44,8 +44,8 @@ export function FaqEvalSection() {
         description={t.faqEvalLead}
       />
 
-      <div className="mt-10 grid grid-cols-12 items-start gap-8 sm:mt-12 lg:gap-10">
-        <div className="col-span-12 space-y-8 lg:col-span-6">
+      <div className="marketing-stagger mt-10 grid grid-cols-12 items-start gap-8 sm:mt-12 lg:gap-10">
+        <div className="marketing-stagger col-span-12 space-y-8 lg:col-span-6">
           {faqs.map((item) => (
             <article key={item.q}>
               <h3 className="font-display text-xl font-semibold tracking-tight text-brand-ink">{item.q}</h3>

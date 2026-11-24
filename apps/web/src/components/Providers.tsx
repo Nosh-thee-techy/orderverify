@@ -16,7 +16,7 @@ import { AppShell } from "./Shell";
  * @returns Whether the dashboard AppShell should stay off
  */
 function isMarketingPath(path: string): boolean {
-  return path === "/" || path.startsWith("/dev/brand");
+  return path === "/" || path.startsWith("/dev/brand") || path.startsWith("/sign-in") || path.startsWith("/sign-up");
 }
 
 /**

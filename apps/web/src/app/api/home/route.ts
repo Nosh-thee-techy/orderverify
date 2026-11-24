@@ -2,9 +2,9 @@
  * apps/web/src/app/api/home/route.ts
  * Numbers for the Today screen: what is on hold, what was released, recent batches.
  */
-import { and, eq, gte } from "drizzle-orm";
+import { and, eq, gte, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { weekStartNairobi, type BatchReport } from "@orderverify/engine";
+import { remainingCapKes, weekStartNairobi, type BatchReport } from "@orderverify/engine";
 import { sellerOrLimit } from "@/server/api";
 import { getDb } from "@/server/db/client";
 import { batches, orders, payments, reports } from "@/server/db/schema";
@@ -17,31 +17,37 @@ export async function GET() {
   const db = getDb();
   const sellerId = gate.seller.id;
   const recent = await db.select().from(batches).where(eq(batches.sellerId, sellerId));
-  const reportRows = await db.select().from(reports);
-  const mine = reportRows.filter((row) => recent.some((batch) => batch.id === row.batchId));
+  const batchIds = recent.map((row) => row.id);
+  const reportRows = batchIds.length ? await db.select().from(reports).where(inArray(reports.batchId, batchIds)) : [];
+  const mine = reportRows;
   let holdKes = 0;
   let holdCount = 0;
   let toCheck = 0;
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   let releasedToday = 0;
-  const orderRows = await db.select().from(orders);
+  const orderRows = await db.select().from(orders).where(eq(orders.sellerId, sellerId));
   for (const order of orderRows) {
-    const batch = recent.find((item) => item.id === order.batchId);
-    if (!batch) continue;
     if (order.sellerDecision === "released" && order.decidedAt && order.decidedAt >= todayStart) releasedToday += 1;
     if (!order.sellerDecision) toCheck += 1;
+    if (order.verdict === "HOLD" && !order.dismissedCrossFlag) {
+      holdCount += 1;
+      holdKes += order.claimedAmountKes ?? order.expectedAmountKes ?? 0;
+    }
   }
-  for (const row of mine) {
-    const report = row.report as BatchReport;
-    holdCount += report.counts?.hold ?? 0;
-    holdKes += report.moneyHeldKes ?? 0;
+  if (holdCount === 0) {
+    for (const row of mine) {
+      const report = row.report as BatchReport;
+      holdCount += report.counts?.hold ?? 0;
+      holdKes += report.moneyHeldKes ?? 0;
+    }
   }
   const weekStart = weekStartNairobi(new Date());
   const spent = await db.select().from(payments).where(and(eq(payments.sellerId, sellerId), gte(payments.createdAt, weekStart)));
   const spentUsd = spent
     .filter((row) => row.status === "pending" || row.status === "settled" || row.status === "bypassed")
     .reduce((sum, row) => sum + Number(row.amountUsd), 0);
+  const kesPerUsd = Number(process.env.KES_PER_USD ?? "129");
   return NextResponse.json({
     displayName: gate.seller.displayName,
     language: gate.seller.language,
@@ -49,13 +55,15 @@ export async function GET() {
     holdCount,
     toCheck,
     releasedToday,
+    batchesChecked: recent.length,
+    weeklyCapLeftKes: remainingCapKes(spentUsd, gate.seller.weeklyCapKes, kesPerUsd),
     bypass: isBypassEnabled(),
     weeklyCapKes: gate.seller.weeklyCapKes,
     agentPaused: gate.seller.agentPaused,
     walletBalanceUsd: Number(gate.seller.walletBalanceUsd),
     spentUsd,
     priceUsd: Number(process.env.PRICE_USD ?? "0.01"),
-    kesPerUsd: Number(process.env.KES_PER_USD ?? "129"),
+    kesPerUsd,
     batches: recent
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .slice(0, 8)

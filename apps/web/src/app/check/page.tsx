@@ -126,6 +126,7 @@ export default function CheckPage() {
         <>
           <PasteArea label={t.pasteChat} value={chat} onChange={setChat} hint={t.howToExport} />
           <FileDrop label={t.uploadDocument} onText={(text) => setChat(text)} />
+          <p className="text-sm leading-relaxed text-brand-muted">{t.privacyNote}</p>
           <button type="button" className="text-sm font-medium text-brand-orange" onClick={() => void useSample()}>{t.useSample}</button>
         </>
       ) : null}

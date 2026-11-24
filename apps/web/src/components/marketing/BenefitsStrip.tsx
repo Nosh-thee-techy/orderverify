@@ -8,6 +8,7 @@
 import { Smartphone, ShieldCheck, Wallet } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { Container } from "./Container";
+import { Reveal } from "./Reveal";
 
 const icons = [Wallet, Smartphone, ShieldCheck];
 
@@ -25,11 +26,15 @@ export function BenefitsStrip() {
         {t.landing.benefits.heading}
       </h2>
       <Container width="wide">
-        <ul className="grid divide-y divide-[#F0E2C8] overflow-hidden rounded-brand-card border border-[#F3E6D4] bg-[#FFF8E4] shadow-brand md:grid-cols-3 md:divide-x md:divide-y-0">
+        <Reveal>
+          <ul className="marketing-stagger grid divide-y divide-[#F0E2C8] overflow-hidden rounded-brand-card border border-[#F3E6D4] bg-[#FFF8E4] shadow-brand md:grid-cols-3 md:divide-x md:divide-y-0">
           {items.map((item, index) => {
             const Icon = icons[index] ?? Wallet;
             return (
-              <li key={item.title} className="flex items-start gap-3.5 px-5 py-5 sm:px-6 sm:py-6">
+              <li
+                key={item.title}
+                className="flex items-start gap-3.5 px-5 py-5 transition-[transform,background-color] duration-200 ease-brand hover:bg-[#FFF3C8] sm:px-6 sm:py-6"
+              >
                 <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-yellow/55 text-brand-orange">
                   <Icon className="h-5 w-5" aria-hidden />
                 </span>
@@ -40,7 +45,8 @@ export function BenefitsStrip() {
               </li>
             );
           })}
-        </ul>
+          </ul>
+        </Reveal>
       </Container>
     </section>
   );

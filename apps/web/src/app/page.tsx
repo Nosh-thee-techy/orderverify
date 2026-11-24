@@ -22,8 +22,7 @@ import {
  * Public landing page: nav through CTA, then the branded footer.
  */
 export default function LandingPage() {
-  preload("/images/hero/clothing.webp", { as: "image" });
-
+ 
   return (
     <MarketingPage>
       <SkipLink />

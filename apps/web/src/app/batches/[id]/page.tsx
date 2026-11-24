@@ -28,15 +28,6 @@ export default function ResultsPage() {
     void load();
   }, [params.id]);
 
-  async function decide(orderId: string, decision: "released" | "held" | "more_info") {
-    await fetch(`/api/orders/${orderId}/decision`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ decision }),
-    });
-    await load();
-  }
-
   if (!data) {
     return (
       <div className="mx-auto max-w-4xl">
@@ -48,7 +39,7 @@ export default function ResultsPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <VerificationReport payload={data} onDecide={decide} />
+      <VerificationReport payload={data} />
     </div>
   );
 }

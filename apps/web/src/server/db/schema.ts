@@ -1,7 +1,8 @@
 /**
  * apps/web/src/server/db/schema.ts
  * Drizzle schema for the seller, her batches, and the payment audit trail.
- * Full phone numbers are never stored. Comments here match the SQL migration.
+ * Seller ids are Clerk user ids. Names, phones, and codes are stored encrypted.
+ * Comments here match the SQL migrations.
  */
 import { sql } from "drizzle-orm";
 import {
@@ -14,14 +15,19 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
-/** One seller. The demo starts with Akinyi and is shaped so more sellers can be added later. */
+/** One seller. Primary key is the Clerk user id (text), not a generated uuid. */
 export const sellers = pgTable("sellers", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: text("id").primaryKey(),
   /** Name shown in the greeting. */
   displayName: text("display_name").notNull(),
+  /** Primary email from Clerk. Empty string until the first profile refresh. */
+  email: text("email").notNull().default(""),
+  /** Optional WhatsApp number, encrypted the same way as order phones. */
+  whatsappNumberEnc: text("whatsapp_number_enc"),
   /** 'en' or 'sw'. */
   language: text("language").notNull().default("en"),
   /** Weekly ceiling for paid checks, in Kenyan shillings. */
@@ -36,7 +42,7 @@ export const sellers = pgTable("sellers", {
 /** One "check my orders" run. */
 export const batches = pgTable("batches", {
   id: uuid("id").primaryKey().defaultRandom(),
-  sellerId: uuid("seller_id")
+  sellerId: text("seller_id")
     .notNull()
     .references(() => sellers.id, { onDelete: "cascade" }),
   /** draft | ready | paying | verifying | done | blocked_cap | error */
@@ -49,26 +55,49 @@ export const batches = pgTable("batches", {
   errorCode: text("error_code"),
 });
 
-/** An order extracted from chat. The seller can edit it before the check runs. */
+/** An order extracted from chat. PII lives in *_enc columns; plaintext name/code stay empty. */
 export const orders = pgTable("orders", {
   id: uuid("id").primaryKey().defaultRandom(),
   batchId: uuid("batch_id")
     .notNull()
     .references(() => batches.id, { onDelete: "cascade" }),
-  customerName: text("customer_name").notNull(),
-  /** Salted hash. The full number is never stored. */
+  sellerId: text("seller_id")
+    .notNull()
+    .references(() => sellers.id, { onDelete: "cascade" }),
+  /** whatsapp | tiktok | upload */
+  source: text("source").notNull().default("upload"),
+  /** Kept empty on insert. Decrypt buyer_name_enc for the owner. */
+  customerName: text("customer_name").notNull().default(""),
+  /** Legacy last-3 helper hash. New matching uses buyer_phone_hash. */
   customerPhoneHash: text("customer_phone_hash"),
   customerPhoneLast3: text("customer_phone_last3"),
+  buyerNameEnc: text("buyer_name_enc"),
+  buyerNameHash: text("buyer_name_hash"),
+  buyerPhoneEnc: text("buyer_phone_enc"),
+  buyerPhoneHash: text("buyer_phone_hash"),
   /** [{ name, qty, unitPriceKes? }] */
   items: jsonb("items").notNull(),
+  itemSummary: text("item_summary").notNull().default(""),
   expectedAmountKes: integer("expected_amount_kes"),
+  claimedAmountKes: integer("claimed_amount_kes"),
   orderedAt: timestamp("ordered_at", { withTimezone: true }).notNull(),
+  /** Kept empty on insert. Decrypt claimed_code_enc for the owner. */
   claimedCode: text("claimed_code"),
+  claimedCodeEnc: text("claimed_code_enc"),
+  claimedCodeHash: text("claimed_code_hash"),
   /** Redacted excerpt for the detail view. Blanked after the retention window. */
   chatExcerpt: text("chat_excerpt").notNull().default(""),
+  /** Engine verdict after the paid check. */
+  engineVerdict: text("engine_verdict"),
+  /** Effective verdict shown to the seller (may be raised by cross-shop). */
+  verdict: text("verdict"),
+  tier: text("tier"),
+  reasons: jsonb("reasons").notNull().default(sql`'[]'::jsonb`),
+  dismissedCrossFlag: boolean("dismissed_cross_flag").notNull().default(false),
   /** null | released | held | more_info */
   sellerDecision: text("seller_decision"),
   decidedAt: timestamp("decided_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 /** Raw M-Pesa messages the seller pasted, plus the parsed fields. */
@@ -96,11 +125,37 @@ export const statementRows = pgTable("statement_rows", {
   withdrawnKes: numeric("withdrawn_kes"),
 });
 
+/** Encrypted M-Pesa statement lines, hashed so other shops can match a code without seeing it. */
+export const mpesaRecords = pgTable(
+  "mpesa_records",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    batchId: uuid("batch_id")
+      .notNull()
+      .references(() => batches.id, { onDelete: "cascade" }),
+    sellerId: text("seller_id")
+      .notNull()
+      .references(() => sellers.id, { onDelete: "cascade" }),
+    transCodeEnc: text("trans_code_enc").notNull(),
+    transCodeHash: text("trans_code_hash").notNull(),
+    amountKes: integer("amount_kes"),
+    payerNameEnc: text("payer_name_enc"),
+    payerNameHash: text("payer_name_hash"),
+    payerPhoneEnc: text("payer_phone_enc"),
+    payerPhoneHash: text("payer_phone_hash"),
+    receivedAt: timestamp("received_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => ({
+    codeSeller: uniqueIndex("mpesa_records_code_seller").on(table.transCodeHash, table.sellerId),
+  }),
+);
+
 /** Every transaction code this seller has already accepted. Catches reuse on a later day. */
 export const seenCodes = pgTable(
   "seen_codes",
   {
-    sellerId: uuid("seller_id")
+    sellerId: text("seller_id")
       .notNull()
       .references(() => sellers.id, { onDelete: "cascade" }),
     code: text("code").notNull(),
@@ -126,7 +181,7 @@ export const reports = pgTable("reports", {
 /** Every x402 payment attempt. Judges and the seller can inspect this. */
 export const payments = pgTable("payments", {
   id: uuid("id").primaryKey().defaultRandom(),
-  sellerId: uuid("seller_id")
+  sellerId: text("seller_id")
     .notNull()
     .references(() => sellers.id, { onDelete: "cascade" }),
   batchId: uuid("batch_id")
@@ -155,6 +210,18 @@ export const agentEvents = pgTable("agent_events", {
   kind: text("kind").notNull(),
   message: text("message").notNull(),
   data: jsonb("data"),
+});
+
+/** Audit that a seller dismissed a cross-shop flag. The other shop is never named. */
+export const crossFlagDismissals = pgTable("cross_flag_dismissals", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sellerId: text("seller_id")
+    .notNull()
+    .references(() => sellers.id, { onDelete: "cascade" }),
+  orderId: uuid("order_id")
+    .notNull()
+    .references(() => orders.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 /** Used by raw SQL fragments that drizzle's sql tag needs in scope for migrations helpers. */

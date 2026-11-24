@@ -4,10 +4,10 @@
  */
 "use client";
 
-import { ArrowRight } from "lucide-react";
 import { useI18n } from "@/i18n";
-import { Button } from "./Button";
 import { Container } from "./Container";
+import { Reveal } from "./Reveal";
+import { StartVerifyingButton } from "./StartVerifyingButton";
 
 /**
  * Closing call-to-action band for the public landing page.
@@ -24,34 +24,33 @@ export function FinalCta() {
         aria-hidden
       />
       <span
-        className="pointer-events-none absolute -left-16 top-[-4rem] h-56 w-56 rounded-full bg-brand-yellow/45"
+        className="marketing-float pointer-events-none absolute -left-16 top-[-4rem] h-56 w-56 rounded-full bg-brand-yellow/45"
         aria-hidden
       />
       <span
-        className="pointer-events-none absolute -right-10 bottom-[-5rem] h-64 w-64 rounded-full bg-brand-raspberry/35"
+        className="marketing-float-slow pointer-events-none absolute -right-10 bottom-[-5rem] h-64 w-64 rounded-full bg-brand-raspberry/35"
         aria-hidden
       />
       <span
-        className="pointer-events-none absolute right-[18%] top-[-3rem] h-28 w-28 rounded-full bg-white/20"
+        className="marketing-float pointer-events-none absolute right-[18%] top-[-3rem] h-28 w-28 rounded-full bg-white/20"
         aria-hidden
       />
 
       <Container width="wide" className="relative py-section sm:py-section-lg">
-        <div className="flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
-          <div className="marketing-rise max-w-2xl">
-            <h2
-              id="final-cta-heading"
-              className="font-display text-[2.15rem] font-semibold leading-[1.1] tracking-tight text-white sm:text-display-lg"
-            >
-              {t.landing.cta.title}
-            </h2>
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-white/90 sm:text-lg">{t.landing.cta.body}</p>
+        <Reveal>
+          <div className="marketing-stagger flex flex-col items-start gap-8 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
+            <div className="max-w-2xl">
+              <h2
+                id="final-cta-heading"
+                className="font-display text-[2.15rem] font-semibold leading-[1.1] tracking-tight text-white sm:text-display-lg"
+              >
+                {t.landing.cta.title}
+              </h2>
+              <p className="mt-4 max-w-xl text-base leading-relaxed text-white/90 sm:text-lg">{t.landing.cta.body}</p>
+            </div>
+            <StartVerifyingButton variant="dark" className="w-full shadow-brand-lg sm:w-auto" />
           </div>
-          <Button href="/check" variant="dark" size="lg" className="marketing-rise w-full shadow-brand-lg sm:w-auto [animation-delay:120ms]">
-            {t.landing.nav.startVerifying}
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </Button>
-        </div>
+        </Reveal>
       </Container>
     </section>
   );

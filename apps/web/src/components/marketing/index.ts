@@ -15,6 +15,7 @@ export { Logo } from "./Logo";
 export { MarketingPage } from "./MarketingPage";
 export { Navbar } from "./Navbar";
 export { ReportPreview } from "./ReportPreview";
+export { Reveal } from "./Reveal";
 export { Section } from "./Section";
 export { SkipLink } from "./SkipLink";
 export { SectionHeading } from "./SectionHeading";

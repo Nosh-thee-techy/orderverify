@@ -3,14 +3,16 @@
  * Download the stored verification report as a PDF. Same data as the screen
  * and the email; verdicts are not recalculated here.
  */
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import type { BatchReport } from "@orderverify/engine";
 import { pdfFilename } from "@/lib/reportDocument";
 import { sellerOrLimit } from "@/server/api";
 import { getDb } from "@/server/db/client";
-import { batches, orders, reports } from "@/server/db/schema";
+import { orders, reports } from "@/server/db/schema";
+import { loadOwnedBatch } from "@/server/ownership";
+import { revealOrder } from "@/server/reveal";
 import { buildReportPdf } from "@/server/reportPdf";
 
 /**
@@ -27,20 +29,17 @@ export async function GET(request: Request) {
   }
 
   const db = getDb();
-  const [batch] = await db
-    .select()
-    .from(batches)
-    .where(and(eq(batches.id, batchId), eq(batches.sellerId, gate.seller.id)))
-    .limit(1);
+  const batch = await loadOwnedBatch(gate.seller.id, batchId);
   if (!batch) return NextResponse.json({ error: "not_found" }, { status: 404 });
   const [reportRow] = await db.select().from(reports).where(eq(reports.batchId, batchId)).limit(1);
   const report = (reportRow?.report ?? null) as BatchReport | null;
   if (!report) return NextResponse.json({ error: "report_not_ready" }, { status: 409 });
   const orderRows = await db.select().from(orders).where(eq(orders.batchId, batchId));
+  const revealed = orderRows.map(revealOrder);
 
   const bytes = await buildReportPdf(
     report,
-    orderRows.map((order) => ({ id: order.id, customerName: order.customerName, claimedCode: order.claimedCode })),
+    revealed.map((order) => ({ id: order.id, customerName: order.customerName, claimedCode: order.claimedCode })),
     lang,
   );
   const filename = pdfFilename(batchId);

@@ -96,24 +96,24 @@ function AboutCollage() {
   const { t } = useI18n();
   return (
     <figure
-      className="relative mx-auto aspect-[4/5] w-full max-w-[28rem] overflow-hidden sm:max-w-[32rem] lg:max-w-none lg:overflow-visible"
+      className="marketing-stagger relative mx-auto aspect-[4/5] w-full max-w-[28rem] overflow-hidden sm:max-w-[32rem] lg:max-w-none lg:overflow-visible"
       aria-label={t.landing.about.collageLabel}
     >
       {/* Decorative shapes sit behind the photos so the collage feels editorial, not a card grid. */}
       <span
-        className="absolute left-[-6%] top-[8%] h-36 w-36 rounded-full bg-brand-yellow/80 sm:h-44 sm:w-44"
+        className="marketing-float absolute left-[-6%] top-[8%] h-36 w-36 rounded-full bg-brand-yellow/80 sm:h-44 sm:w-44"
         aria-hidden
       />
       <span
-        className="absolute bottom-[10%] left-[18%] h-24 w-24 rounded-[1.75rem] bg-brand-tangerine/55 sm:h-28 sm:w-28"
+        className="marketing-float-slow absolute bottom-[10%] left-[18%] h-24 w-24 rounded-[1.75rem] bg-brand-tangerine/55 sm:h-28 sm:w-28"
         aria-hidden
       />
       <span
-        className="absolute right-[-4%] top-[-2%] h-32 w-32 rotate-12 rounded-[42%] bg-brand-raspberry/40 sm:h-40 sm:w-40"
+        className="marketing-float absolute right-[-4%] top-[-2%] h-32 w-32 rotate-12 rounded-[42%] bg-brand-raspberry/40 sm:h-40 sm:w-40"
         aria-hidden
       />
       <span
-        className="absolute bottom-[22%] right-[28%] h-16 w-16 rounded-full bg-brand-yellow/50"
+        className="marketing-float-slow absolute bottom-[22%] right-[28%] h-16 w-16 rounded-full bg-brand-yellow/50"
         aria-hidden
       />
 
@@ -145,7 +145,7 @@ export function AboutSection() {
       <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16 xl:gap-20">
         <div>
           <SectionHeading eyebrow={about.eyebrow} title={about.title} description={about.description} />
-          <ul className="mt-8 space-y-3.5">
+          <ul className="marketing-stagger mt-8 space-y-3.5">
             {about.points.map((point) => (
               <li key={point} className="flex items-start gap-3">
                 <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-yellow/60 text-brand-orange">

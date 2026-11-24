@@ -12,6 +12,7 @@ import {
   type BatchReport,
   type VerifyBatchInput,
 } from "@orderverify/engine";
+import { decryptOrEmpty } from "../crypto.js";
 import { getDb } from "../db/client.js";
 import {
   agentEvents,
@@ -24,6 +25,8 @@ import {
   sellers,
   statementRows,
 } from "../db/schema.js";
+import { persistMpesaRecords, persistOrderVerdictsFromEngine } from "../historyStore.js";
+import { applyCrossSellerChecks } from "../network.js";
 import { draftReply } from "./replies.js";
 import { explorerUrl, fetchWithPayment, isBypassEnabled, readSettlement } from "./x402Client.js";
 
@@ -83,11 +86,11 @@ async function runBatchOnce(batchId: string, sellerId: string): Promise<RunResul
     batchId,
     orders: orderRows.map((order) => ({
       orderId: order.id,
-      customerName: order.customerName,
+      customerName: decryptOrEmpty(order.buyerNameEnc) || order.customerName || "Customer",
       items: order.items as VerifyBatchInput["orders"][number]["items"],
       expectedAmountKes: order.expectedAmountKes,
       orderedAt: order.orderedAt.toISOString(),
-      claimedCode: order.claimedCode,
+      claimedCode: decryptOrEmpty(order.claimedCodeEnc) || order.claimedCode,
     })),
     payments: evidence.map((item) => ({
       paymentId: item.id,
@@ -114,7 +117,25 @@ async function runBatchOnce(batchId: string, sellerId: string): Promise<RunResul
 
   try {
     await emit(batchId, "requested", "Asked the verification service to check this batch.");
-    const report = await callVerify(batch.id, batch.idempotencyKey, input);
+    const engineReport = await callVerify(batch.id, batch.idempotencyKey, input);
+    const { report, reasonsByOrder } = await applyCrossSellerChecks(
+      engineReport,
+      sellerId,
+      orderRows.map((order) => ({ orderId: order.id, claimedCodeHash: order.claimedCodeHash })),
+    );
+    await persistMpesaRecords(
+      sellerId,
+      batchId,
+      statements.map((row) => ({
+        receiptNo: row.receiptNo,
+        completedAt: row.completedAt,
+        details: row.details,
+        status: row.status,
+        paidInKes: row.paidInKes === null ? null : Number(row.paidInKes),
+        withdrawnKes: row.withdrawnKes === null ? null : Number(row.withdrawnKes),
+      })),
+    );
+    await persistOrderVerdictsFromEngine(engineReport, report, reasonsByOrder);
     await db.insert(reports).values({
       batchId,
       engineVersion: report.engineVersion,
@@ -316,7 +337,7 @@ async function writeDrafts(batchId: string, report: BatchReport) {
   for (const order of report.orders) {
     if (order.verdict === "RELEASE") continue;
     const row = await getDb().select().from(orders).where(eq(orders.id, order.orderId)).limit(1);
-    const name = row[0]?.customerName ?? "there";
+    const name = decryptOrEmpty(row[0]?.buyerNameEnc) || row[0]?.customerName || "there";
     drafts[order.orderId] = await draftReply(name, order.headlineEn);
   }
   if (Object.keys(drafts).length) {
