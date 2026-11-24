@@ -30,6 +30,7 @@ const csp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   transpilePackages: ["@orderverify/engine", "@orderverify/fixtures"],
   serverExternalPackages: ["unpdf", "mammoth", "xlsx", "jszip", "tesseract.js"],
   // A package-lock.json in the user home would otherwise make Next watch the whole drive.

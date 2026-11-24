@@ -1,0 +1,15 @@
+# .dockerignore
+# Keep Fly image builds fast. Never copy local secrets into the image.
+**/node_modules
+**/.next
+.git
+.cursor
+.env
+.env.*
+**/.env
+**/.env.*
+npm-debug.log
+eval-results.json
+pnpm-lock.yaml
+**/*.md
+docs

@@ -1,0 +1,20 @@
+# fly.api.toml
+# Paid verification API on Fly.io.
+app = "ov-ke-api"
+primary_region = "jnb"
+
+[build]
+  dockerfile = "Dockerfile.api"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1

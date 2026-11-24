@@ -66,6 +66,10 @@ Not included. The prompt allows cutting it. Verification is Vitest plus a manual
 
 User-facing strings exist in both `i18n/en.ts` and `i18n/sw.ts`. The Swahili is written for a Nairobi seller (standard Kiswahili, short sentences), not machine-translated jargon.
 
+## Fly.io deployment
+
+Production runs as two Fly apps in `jnb`: `ov-ke-web` (Next.js) and `ov-ke-api` (verify-api), with Fly Postgres `ov-ke-db`. Fly blocks app names that contain the word "verify", so these slugs omit it. Bypass stays off in production. If payment secrets are missing, the API boots and answers `/health`, but `POST /v1/verify-batch` returns 503 until `OZ_API_KEY` and `SERVICE_RECIPIENT` are set.
+
 ## Local Postgres port
 
 This machine already runs PostgreSQL 16 on port 5432. Docker Compose publishes the demo database on host port 5433 so the two servers do not share a port. Inside the container Postgres still listens on 5432.

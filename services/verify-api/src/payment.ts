@@ -9,6 +9,14 @@ import { HTTPFacilitatorClient } from "@x402/core/server";
 import { ExactStellarScheme } from "@x402/stellar/exact/server";
 
 /**
+ * Whether live x402 can be mounted. Missing keys must not crash the process on boot.
+ * @returns True when facilitator URL, API key, and pay-to account are all set
+ */
+export function paymentConfigured(): boolean {
+  return Boolean(process.env.FACILITATOR_URL && process.env.OZ_API_KEY && process.env.SERVICE_RECIPIENT);
+}
+
+/**
  * Protect POST /v1/verify-batch with a ~$0.01 Stellar payment.
  * @param app - Express app that already has JSON parsing and the idempotency short-circuit
  */
