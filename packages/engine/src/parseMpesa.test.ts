@@ -66,6 +66,26 @@ describe("parseMpesaMessage", () => {
     expect(parsed.missing).toContain("code");
   });
 
+  it("parses a Jumbe-style proof without a payer name", () => {
+    const parsed = parseMpesaMessage(
+      "UKC9JUMBEE Confirmed. You have received Ksh2,500.00 on 12/11/26 at 2:15 PM. Jumbe payment confirmation.",
+    );
+    expect(parsed.ok).toBe(true);
+    expect(parsed.fields.code).toBe("UKC9JUMBEE");
+    expect(parsed.fields.amountKes).toBe(2500);
+    expect(parsed.fields.senderName).toBeNull();
+    expect(parsed.missing).toContain("senderName");
+  });
+
+  it("keeps a masked phone and still reads the payer name", () => {
+    const parsed = parseMpesaMessage(
+      "UKC9MASKED Confirmed. You have received Ksh800.00 from JOHN DOE 0712***678 on 3/10/26 at 10:00 AM. New M-PESA balance is Ksh1,200.00.",
+    );
+    expect(parsed.ok).toBe(true);
+    expect(parsed.fields.senderName?.toUpperCase()).toContain("JOHN");
+    expect(parsed.fields.phone).toContain("***");
+  });
+
   it("splits a paste on blank lines and on a new code", () => {
     const messages = splitMpesaMessages(`${VARIANTS[0]}\n\n${VARIANTS[1]}`);
     expect(messages).toHaveLength(2);

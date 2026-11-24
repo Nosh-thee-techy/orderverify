@@ -44,15 +44,6 @@ export interface ReportPayload {
 export function VerificationReport({ payload }: { payload: ReportPayload }) {
   const { t, lang } = useI18n();
   const router = useRouter();
-  const doc = useMemo(
-    () =>
-      buildReportDocument(
-        payload.report,
-        payload.orders.map((order) => ({ id: order.id, customerName: order.customerName, claimedCode: order.claimedCode })),
-        lang,
-      ),
-    [payload.report, payload.orders, lang],
-  );
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState("");
   const [emailOpen, setEmailOpen] = useState(false);
@@ -61,6 +52,59 @@ export function VerificationReport({ payload }: { payload: ReportPayload }) {
   const [emailMessage, setEmailMessage] = useState("");
   const [emailOk, setEmailOk] = useState(false);
   const [alreadySent, setAlreadySent] = useState(false);
+  const [orders, setOrders] = useState(payload.orders);
+  const [report, setReport] = useState(payload.report);
+
+  const doc = useMemo(
+    () =>
+      buildReportDocument(
+        report,
+        orders.map((order) => ({ id: order.id, customerName: order.customerName, claimedCode: order.claimedCode })),
+        lang,
+      ),
+    [report, orders, lang],
+  );
+
+  /**
+   * Dismiss a cross-shop flag after an explicit confirm. Sends confirm:true to the API.
+   * @param orderId - Order that owns the flag
+   * @returns New verdict, or null on failure
+   */
+  async function dismissCrossShop(orderId: string): Promise<string | null> {
+    const response = await fetch(`/api/orders/${encodeURIComponent(orderId)}/dismiss-cross`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ confirm: true }),
+    });
+    if (!response.ok) return null;
+    const body = (await response.json()) as { verdict?: string };
+    const verdict = body.verdict;
+    if (verdict !== "RELEASE" && verdict !== "REVIEW" && verdict !== "HOLD") return null;
+    setOrders((current) =>
+      current.map((order) =>
+        order.id === orderId ? { ...order, dismissedCrossFlag: true, reasons: [], verdict } : order,
+      ),
+    );
+    setReport((current) => {
+      const nextOrders = current.orders.map((item) => (item.orderId === orderId ? { ...item, verdict } : item));
+      const counts = { release: 0, review: 0, hold: 0 };
+      let moneyHeldKes = 0;
+      for (const item of nextOrders) {
+        if (item.verdict === "HOLD") {
+          counts.hold += 1;
+          moneyHeldKes += item.amountExpectedKes ?? item.amountPaidKes ?? 0;
+        } else if (item.verdict === "REVIEW") counts.review += 1;
+        else counts.release += 1;
+      }
+      return { ...current, orders: nextOrders, counts, moneyHeldKes };
+    });
+    return verdict;
+  }
+
+  useEffect(() => {
+    setOrders(payload.orders);
+    setReport(payload.report);
+  }, [payload.orders, payload.report]);
 
   useEffect(() => {
     const stored = window.localStorage.getItem("ov_report_email");
@@ -222,9 +266,24 @@ export function VerificationReport({ payload }: { payload: ReportPayload }) {
           <section>
             <h2 className="font-display text-lg font-semibold text-brand-ink">{t.results}</h2>
             <ul className="mt-4 divide-y divide-[#F0E2C8] overflow-hidden rounded-brand-card border border-[#F0E2C8]">
-              {doc.orders.map((order) => (
-                <OrderBlock key={order.orderId} order={order} />
-              ))}
+              {doc.orders.map((order) => {
+                const source = orders.find((row) => row.id === order.orderId);
+                const hasCross =
+                  !source?.dismissedCrossFlag &&
+                  Boolean(
+                    source?.reasons?.some(
+                      (reason) => reason.id === "CROSS_SHOP_STATEMENT" || reason.id === "CROSS_SHOP_CLAIM",
+                    ),
+                  );
+                return (
+                  <OrderBlock
+                    key={order.orderId}
+                    order={order}
+                    showDismiss={hasCross}
+                    onDismiss={() => dismissCrossShop(order.orderId)}
+                  />
+                );
+              })}
             </ul>
           </section>
 
@@ -271,8 +330,35 @@ function SummaryCard({ label, value, tone }: { label: string; value: number; ton
   );
 }
 
-function OrderBlock({ order }: { order: ReportOrderLine }) {
+function OrderBlock({
+  order,
+  showDismiss,
+  onDismiss,
+}: {
+  order: ReportOrderLine;
+  showDismiss?: boolean;
+  onDismiss?: () => Promise<string | null>;
+}) {
   const { t, lang } = useI18n();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [working, setWorking] = useState(false);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+
+  async function confirmDismiss() {
+    if (!onDismiss) return;
+    setWorking(true);
+    setError("");
+    const verdict = await onDismiss();
+    setWorking(false);
+    if (!verdict) {
+      setError(t.thisIsFineFailed);
+      return;
+    }
+    setDone(true);
+    setConfirmOpen(false);
+  }
+
   return (
     <li className="bg-white px-4 py-4 sm:px-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -296,6 +382,51 @@ function OrderBlock({ order }: { order: ReportOrderLine }) {
         </div>
       </dl>
       <p className="mt-3 text-sm leading-relaxed text-brand-ink">{order.explanation}</p>
+      {done ? (
+        <p className="mt-3 text-sm font-medium text-brand-orange" role="status">
+          {t.thisIsFineDone}
+        </p>
+      ) : null}
+      {showDismiss && !done ? (
+        <div className="mt-4 rounded-brand-control border border-[#F0E2C8] bg-brand-bg p-3">
+          {!confirmOpen ? (
+            <button
+              type="button"
+              className="min-h-11 rounded-brand-control border border-[#F0E2C8] bg-white px-4 text-sm font-semibold text-brand-ink hover:border-brand-tangerine"
+              onClick={() => setConfirmOpen(true)}
+            >
+              {t.thisIsFine}
+            </button>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm leading-relaxed text-brand-muted">{t.thisIsFineConfirm}</p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={working}
+                  className="min-h-11 rounded-brand-control bg-brand-orange px-4 text-sm font-semibold text-white disabled:opacity-50"
+                  onClick={() => void confirmDismiss()}
+                >
+                  {working ? t.thisIsFineWorking : t.thisIsFineConfirmButton}
+                </button>
+                <button
+                  type="button"
+                  disabled={working}
+                  className="min-h-11 rounded-brand-control border border-[#F0E2C8] bg-white px-4 text-sm font-semibold text-brand-ink"
+                  onClick={() => setConfirmOpen(false)}
+                >
+                  {t.thisIsFineCancel}
+                </button>
+              </div>
+            </div>
+          )}
+          {error ? (
+            <p className="mt-2 text-sm text-brand-hold" role="alert">
+              {error}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
     </li>
   );
 }

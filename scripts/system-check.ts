@@ -164,7 +164,7 @@ async function main(): Promise<void> {
       new Set(otherStatement.map((row) => row.hash)),
       new Set(otherClaims.map((row) => row.hash).filter((value): value is string => Boolean(value))),
     );
-    check("cross-shop statement raises to HOLD", raised.report.orders[0]?.verdict === "HOLD");
+    check("cross-shop statement raises to REVIEW", raised.report.orders[0]?.verdict === "REVIEW");
     check("cross-shop never grants STATEMENT_VERIFIED from the other shop", raised.report.orders[0]?.tier !== "STATEMENT_VERIFIED" || wanjikuEngine.orders[0]?.tier === "STATEMENT_VERIFIED");
     await insertVerifiedBatch(db, MOCK_WANJIKU, "tiktok", [stolenOrder], [stolenPayment], [], raised.report, raised.reasonsByOrder);
 
@@ -218,7 +218,7 @@ async function main(): Promise<void> {
       await insertVerifiedBatch(db, MOCK_WANJIKU, "tiktok", [stolenOrder], [stolenPayment], [], raised.report, raised.reasonsByOrder);
       console.log("\n  mock shops left in the database:");
       console.log(`    ${MOCK_AKINYI}  (Akinyi Otieno — statement batch)`);
-      console.log(`    ${MOCK_WANJIKU} (Jane Wanjiku — cross-shop HOLD)`);
+      console.log(`    ${MOCK_WANJIKU} (Jane Wanjiku — cross-shop REVIEW)`);
       console.log("  pass --clean to remove them");
     }
   } finally {

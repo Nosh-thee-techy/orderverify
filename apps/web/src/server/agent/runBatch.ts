@@ -12,7 +12,7 @@ import {
   type BatchReport,
   type VerifyBatchInput,
 } from "@orderverify/engine";
-import { decryptOrEmpty } from "../crypto.js";
+import { decryptOrEmpty, hashCode } from "../crypto.js";
 import { getDb } from "../db/client.js";
 import {
   agentEvents,
@@ -25,7 +25,7 @@ import {
   sellers,
   statementRows,
 } from "../db/schema.js";
-import { persistMpesaRecords, persistOrderVerdictsFromEngine } from "../historyStore.js";
+import { persistOrderVerdictsFromEngine, publishMatchableHashes } from "../historyStore.js";
 import { applyCrossSellerChecks } from "../network.js";
 import { draftReply } from "./replies.js";
 import { explorerUrl, fetchWithPayment, isBypassEnabled, readSettlement } from "./x402Client.js";
@@ -118,14 +118,27 @@ async function runBatchOnce(batchId: string, sellerId: string): Promise<RunResul
   try {
     await emit(batchId, "requested", "Asked the verification service to check this batch.");
     const engineReport = await callVerify(batch.id, batch.idempotencyKey, input);
+    // Hash in memory for this check. DB claimed_code_hash stays null until we publish below.
+    const orderCodes = orderRows.map((order) => {
+      const claimedCode = decryptOrEmpty(order.claimedCodeEnc) || order.claimedCode;
+      return { orderId: order.id, claimedCode, claimedCodeHash: hashCode(claimedCode) };
+    });
     const { report, reasonsByOrder } = await applyCrossSellerChecks(
       engineReport,
       sellerId,
-      orderRows.map((order) => ({ orderId: order.id, claimedCodeHash: order.claimedCodeHash })),
+      orderCodes.map((row) => ({ orderId: row.orderId, claimedCodeHash: row.claimedCodeHash })),
     );
-    await persistMpesaRecords(
+    await persistOrderVerdictsFromEngine(engineReport, report, reasonsByOrder);
+    await db.insert(reports).values({
+      batchId,
+      engineVersion: report.engineVersion,
+      report,
+    });
+    // Only after a settled report do codes become matchable by other shops.
+    await publishMatchableHashes(
       sellerId,
       batchId,
+      orderCodes.map((row) => ({ orderId: row.orderId, claimedCode: row.claimedCode })),
       statements.map((row) => ({
         receiptNo: row.receiptNo,
         completedAt: row.completedAt,
@@ -135,12 +148,6 @@ async function runBatchOnce(batchId: string, sellerId: string): Promise<RunResul
         withdrawnKes: row.withdrawnKes === null ? null : Number(row.withdrawnKes),
       })),
     );
-    await persistOrderVerdictsFromEngine(engineReport, report, reasonsByOrder);
-    await db.insert(reports).values({
-      batchId,
-      engineVersion: report.engineVersion,
-      report,
-    });
     const held = report.orders.filter((order) => order.verdict === "HOLD");
     const heldMoney = report.moneyHeldKes;
     await emit(batchId, "report_received", "Report delivered.");

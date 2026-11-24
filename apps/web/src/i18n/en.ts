@@ -227,9 +227,17 @@ export const en = {
   kesHeld: "KES held",
   weeklyCapLeft: "Weekly cap left",
   thisIsFine: "This is fine",
+  thisIsFineConfirm:
+    "Dismiss this cross-shop warning? The engine verdict comes back, and we keep an audit that you accepted it. The other shop is never named.",
+  thisIsFineConfirmButton: "Yes, dismiss warning",
+  thisIsFineCancel: "Keep warning",
+  thisIsFineWorking: "Updating…",
+  thisIsFineFailed: "Could not dismiss that warning. Try again.",
+  thisIsFineDone: "Warning dismissed",
   privacyNote:
     "We store each order and each M-Pesa line you upload. Names, phone numbers, and payment codes are encrypted. Matching across shops uses a one-way hash only. Another shop never sees your data — they only get a warning that a code also appeared elsewhere.",
-  crossShopHold: "This payment code appears in another OrderVerify shop's M-Pesa records, so it was not paid to you.",
+  crossShopHold:
+    "This payment code also appears in another OrderVerify shop's M-Pesa records. Check before you dispatch.",
   crossShopClaim: "This payment code was also claimed on another OrderVerify shop.",
 };
 

@@ -1,0 +1,19 @@
+{
+  "name": "@orderverify/telegram-bot",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Telegram front-end for OrderVerify. Same engine and verify-api as the web app — for UX comparison, not the Kenya market.",
+  "scripts": {
+    "dev": "tsx watch --env-file=../../.env src/bot.ts",
+    "start": "tsx --env-file=../../.env src/bot.ts"
+  },
+  "dependencies": {
+    "@orderverify/engine": "*",
+    "grammy": "^1.38.3"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

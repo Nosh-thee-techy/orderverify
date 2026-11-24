@@ -5,7 +5,8 @@
  */
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isPublic = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)", "/api/health"]);
+// /evals stays public so demos and judges can see catch rates without signing up.
+const isPublic = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)", "/api/health", "/evals"]);
 
 // Fly, Vercel, and local. NEXT_PUBLIC_APP_URL is the canonical public origin in production.
 const authorizedParties = [

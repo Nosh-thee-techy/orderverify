@@ -8,10 +8,12 @@ import { and, inArray, ne } from "drizzle-orm";
 import type { BatchReport, Verdict } from "@orderverify/engine";
 import { mpesaRecords, orders } from "./db/schema.js";
 
+// Uploaded statements are seller-provided, so a cross-shop statement hit is REVIEW
+// (check first), not HOLD. Live feed / STK tiers can raise this later.
 export const CROSS_SHOP_STATEMENT = {
   id: "CROSS_SHOP_STATEMENT",
-  en: "This payment code appears in another OrderVerify shop's M-Pesa records, so it was not paid to you.",
-  sw: "Kodi hii ya malipo inaonekana kwenye rekodi za M-Pesa za duka lingine la OrderVerify, kwa hiyo haukupokea malipo haya.",
+  en: "This payment code also appears in another OrderVerify shop's M-Pesa records. Check before you dispatch.",
+  sw: "Kodi hii ya malipo inaonekana pia kwenye rekodi za M-Pesa za duka lingine la OrderVerify. Angalia kabla ya kutuma.",
 } as const;
 
 export const CROSS_SHOP_CLAIM = {
@@ -59,7 +61,7 @@ export function applyNetworkHits(
     const reasons: NetworkReason[] = [];
     let verdict = order.verdict;
     if (otherStatementHashes.has(hash)) {
-      verdict = raiseVerdict(verdict, "HOLD");
+      verdict = raiseVerdict(verdict, "REVIEW");
       reasons.push({ id: CROSS_SHOP_STATEMENT.id, en: CROSS_SHOP_STATEMENT.en, sw: CROSS_SHOP_STATEMENT.sw });
     } else if (otherClaimHashes.has(hash)) {
       verdict = raiseVerdict(verdict, "REVIEW");
@@ -132,8 +134,9 @@ export async function applyCrossSellerChecks(
 export function effectiveVerdict(engineVerdict: Verdict, dismissed: boolean, networkReasons: NetworkReason[]): Verdict {
   if (dismissed || networkReasons.length === 0) return engineVerdict;
   return networkReasons.reduce((current, reason) => {
-    if (reason.id === CROSS_SHOP_STATEMENT.id) return raiseVerdict(current, "HOLD");
-    if (reason.id === CROSS_SHOP_CLAIM.id) return raiseVerdict(current, "REVIEW");
+    if (reason.id === CROSS_SHOP_STATEMENT.id || reason.id === CROSS_SHOP_CLAIM.id) {
+      return raiseVerdict(current, "REVIEW");
+    }
     return current;
   }, engineVerdict);
 }

@@ -9,7 +9,7 @@ import { parseMpesaMessage, parseStatement, redactPhones, splitMpesaMessages } f
 import { sellerOrLimit, readJson } from "@/server/api";
 import { getDb } from "@/server/db/client";
 import { batches, orders, paymentEvidence, reports, statementRows } from "@/server/db/schema";
-import { encryptOrderFields, persistMpesaRecords } from "@/server/historyStore";
+import { encryptOrderFields } from "@/server/historyStore";
 import { phonePrivacy } from "@/server/session";
 
 const orderSchema = z.object({
@@ -120,6 +120,8 @@ export async function POST(request: Request) {
     );
   }
   if (statement.length) {
+    // Statement rows stay on the batch for this check. Matchable mpesa_records
+    // are published only after payment settles (see publishMatchableHashes).
     await db.insert(statementRows).values(
       statement.map((row) => ({
         batchId: batch.id,
@@ -131,7 +133,6 @@ export async function POST(request: Request) {
         withdrawnKes: row.withdrawnKes === null ? null : String(row.withdrawnKes),
       })),
     );
-    await persistMpesaRecords(gate.seller.id, batch.id, statement);
   }
   return NextResponse.json({ id: batch.id, evidenceTier: tier, orders: parsed.data.orders.length, payments: messages.length });
 }

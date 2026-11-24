@@ -1,12 +1,14 @@
 /**
  * apps/web/src/app/api/orders/[id]/dismiss-cross/route.ts
- * "This is fine" on a cross-shop flag. Restores the engine verdict for the badge
- * and writes an audit row. Never names the other shop.
+ * "This is fine" on a cross-shop flag. Requires an explicit confirm body so a
+ * tap cannot undo the warning by accident. Restores the engine verdict for the
+ * badge and writes an audit row. Never names the other shop.
  */
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import type { BatchReport, Verdict } from "@orderverify/engine";
-import { sellerOrLimit } from "@/server/api";
+import { readJson, sellerOrLimit } from "@/server/api";
 import { getDb } from "@/server/db/client";
 import { crossFlagDismissals, orders, reports } from "@/server/db/schema";
 import { effectiveVerdict, type NetworkReason } from "@/server/network";
@@ -16,10 +18,25 @@ function isVerdict(value: string | null): value is Verdict {
   return value === "RELEASE" || value === "REVIEW" || value === "HOLD";
 }
 
+const bodySchema = z.object({
+  /** Must be true. Stops accidental dismiss of a cross-shop warning. */
+  confirm: z.literal(true),
+});
+
 /** Dismiss the cross-shop warning on one of this seller's orders. */
-export async function POST(_request: Request, context: { params: Promise<{ id: string }> }) {
+export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
   const gate = await sellerOrLimit();
   if ("response" in gate) return gate.response;
+  const body = await readJson(request, 4_096);
+  if ("response" in body) return body.response;
+  const parsed = bodySchema.safeParse(body.json);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "confirm_required", message: "Send { \"confirm\": true } to dismiss this cross-shop warning." },
+      { status: 400 },
+    );
+  }
+
   const { id } = await context.params;
   const db = getDb();
   const [order] = await db.select().from(orders).where(eq(orders.id, id)).limit(1);

@@ -142,6 +142,21 @@ describe("checks and verdicts", () => {
     expect(report.orders[0]?.headlineEn).toContain("order #A");
   });
 
+  it("skips NAME when a Jumbe-style proof has no payer name", () => {
+    const code = codeFor(12, 11, "JUMBE01");
+    const report = run(
+      [order({ orderId: "jumbe", customerName: "Mary Wanjiku", claimedCode: code })],
+      [
+        pay(
+          "p1",
+          `${code} Confirmed. You have received Ksh2,500.00 on 12/11/26 at 2:15 PM. Jumbe payment confirmation.`,
+        ),
+      ],
+    );
+    expect(report.orders[0]?.checks.find((check) => check.id === "NAME")?.status).toBe("skip");
+    expect(report.orders[0]?.verdict).not.toBe("HOLD");
+  });
+
   it("reviews a different payer and holds a missing payment", () => {
     const code = codeFor(12, 11, "HHHHHHH");
     const report = run(

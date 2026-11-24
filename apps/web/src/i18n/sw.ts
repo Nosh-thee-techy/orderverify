@@ -228,8 +228,16 @@ export const sw: Dictionary = {
   kesHeld: "KES iliyosimamishwa",
   weeklyCapLeft: "Kikomo kilichobaki",
   thisIsFine: "Hii ni sawa",
+  thisIsFineConfirm:
+    "Ondoa onyo hili la duka lingine? Uamuzi wa injini utarudi, na tutahifadhi rekodi kwamba umekubali. Duka lingine halitajwi.",
+  thisIsFineConfirmButton: "Ndiyo, ondoa onyo",
+  thisIsFineCancel: "Weka onyo",
+  thisIsFineWorking: "Inasasisha…",
+  thisIsFineFailed: "Haikuweza kuondoa onyo. Jaribu tena.",
+  thisIsFineDone: "Onyo limeondolewa",
   privacyNote:
     "Tunahifadhi kila oda na kila mstari wa M-Pesa unaopakia. Majina, simu, na kodi zinasimbwa. Ulinganisho kati ya maduka unatumia hash ya njia moja tu. Duka lingine halioni data yako — linapata onyo tu kwamba kodi ilionekana mahali pengine.",
-  crossShopHold: "Kodi hii ya malipo inaonekana kwenye rekodi za M-Pesa za duka lingine la OrderVerify, kwa hiyo haukupokea malipo haya.",
+  crossShopHold:
+    "Kodi hii ya malipo inaonekana pia kwenye rekodi za M-Pesa za duka lingine la OrderVerify. Angalia kabla ya kutuma.",
   crossShopClaim: "Kodi hii ya malipo imedaiwa pia kwenye duka lingine la OrderVerify.",
 };

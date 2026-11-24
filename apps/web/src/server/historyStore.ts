@@ -24,6 +24,8 @@ export type IncomingOrder = {
 
 /**
  * Encrypt one order's PII. Does not write.
+ * claimedCodeHash stays null until publishMatchableHashes() after a paid report —
+ * unpaid drafts must not pollute other shops' cross-shop lookups.
  * @param order - Parsed order
  */
 export function encryptOrderFields(order: IncomingOrder): {
@@ -32,7 +34,7 @@ export function encryptOrderFields(order: IncomingOrder): {
   buyerPhoneEnc: string | null;
   buyerPhoneHash: string | null;
   claimedCodeEnc: string | null;
-  claimedCodeHash: string | null;
+  claimedCodeHash: null;
   itemSummary: string;
 } {
   const itemSummary = order.items.map((item) => item.name).join(", ");
@@ -42,9 +44,34 @@ export function encryptOrderFields(order: IncomingOrder): {
     buyerPhoneEnc: order.phone ? encrypt(order.phone) : null,
     buyerPhoneHash: hashPhone(order.phone),
     claimedCodeEnc: order.claimedCode ? encrypt(order.claimedCode) : null,
-    claimedCodeHash: hashCode(order.claimedCode),
+    // Intentionally null until the batch has settled and the report is stored.
+    claimedCodeHash: null,
     itemSummary,
   };
+}
+
+/**
+ * After a paid verification, publish this batch's codes into the matchable index.
+ * Sets claimed_code_hash on orders and writes mpesa_records from the statement.
+ *
+ * @param sellerId - Owner
+ * @param batchId - Settled batch
+ * @param orderCodes - Decrypted claimed codes for each order id
+ * @param statement - Parsed statement rows (may be empty)
+ */
+export async function publishMatchableHashes(
+  sellerId: string,
+  batchId: string,
+  orderCodes: { orderId: string; claimedCode: string | null }[],
+  statement: StatementRow[],
+): Promise<void> {
+  const db = getDb();
+  for (const row of orderCodes) {
+    const claimedCodeHash = hashCode(row.claimedCode);
+    if (!claimedCodeHash) continue;
+    await db.update(orders).set({ claimedCodeHash }).where(eq(orders.id, row.orderId));
+  }
+  await persistMpesaRecords(sellerId, batchId, statement);
 }
 
 /**

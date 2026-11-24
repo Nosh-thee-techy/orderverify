@@ -70,6 +70,14 @@ User-facing strings exist in both `i18n/en.ts` and `i18n/sw.ts`. The Swahili is 
 
 Production runs as two Fly apps in `jnb`: `ov-ke-web` (Next.js) and `ov-ke-api` (verify-api), with Fly Postgres `ov-ke-db`. Fly blocks app names that contain the word "verify", so these slugs omit it. Bypass stays off in production. If payment secrets are missing, the API boots and answers `/health`, but `POST /v1/verify-batch` returns 503 until `OZ_API_KEY` and `SERVICE_RECIPIENT` are set.
 
+## Cross-shop index timing
+
+`claimed_code_hash` and `mpesa_records` are written only after a batch settles and the report is stored. Cross-shop hits from another shop's uploaded statement raise to REVIEW (not HOLD), because a seller-uploaded CSV is not Safaricom ground truth. `/evals` stays public for demos.
+
+## Jumbe and masked senders
+
+Jumbe-style proofs may omit the payer name. The NAME check already skips when `senderName` is null. Fixtures cover Jumbe and masked MSISDNs so parsers stay honest as Safaricom layouts change.
+
 ## Local Postgres port
 
 This machine already runs PostgreSQL 16 on port 5432. Docker Compose publishes the demo database on host port 5433 so the two servers do not share a port. Inside the container Postgres still listens on 5432.

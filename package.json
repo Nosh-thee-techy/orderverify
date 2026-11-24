@@ -12,6 +12,7 @@
     "dev": "npx concurrently -n web,api -c green,blue \"npm run dev -w @orderverify/web\" \"npm run dev -w @orderverify/verify-api\"",
     "dev:web": "npm run dev -w @orderverify/web",
     "dev:api": "npm run dev -w @orderverify/verify-api",
+    "dev:telegram": "npm run start -w @orderverify/telegram-bot",
     "test": "vitest run",
     "eval": "tsx scripts/run-eval.ts",
     "system-check": "tsx scripts/system-check.ts",
@@ -36,5 +37,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "grammy": "^1.38.3"
   }
 }

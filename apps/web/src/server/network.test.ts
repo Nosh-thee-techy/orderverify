@@ -1,7 +1,7 @@
 /**
  * apps/web/src/server/network.test.ts
- * Cross-shop raises: statement in another shop is HOLD; two claims without a
- * statement are REVIEW; a seller never flags herself; HOLD is never lowered.
+ * Cross-shop raises: statement or claim in another shop is REVIEW (uploaded
+ * statements are not ground truth); a seller never flags herself; HOLD is never lowered.
  */
 import { describe, expect, it } from "vitest";
 import type { BatchReport, OrderVerdict } from "@orderverify/engine";
@@ -43,7 +43,7 @@ function report(orders: OrderVerdict[]): BatchReport {
 }
 
 describe("cross-seller network", () => {
-  it("holds when another shop's statement contains the code", () => {
+  it("reviews when another shop's statement contains the code", () => {
     const engine = report([order({ orderId: "wanjiku-1", verdict: "RELEASE" })]);
     const { report: raised, reasonsByOrder } = applyNetworkHits(
       engine,
@@ -51,9 +51,9 @@ describe("cross-seller network", () => {
       new Set([HASH]),
       new Set(),
     );
-    expect(raised.orders[0]?.verdict).toBe("HOLD");
+    expect(raised.orders[0]?.verdict).toBe("REVIEW");
     expect(reasonsByOrder.get("wanjiku-1")?.[0]?.en).toBe(CROSS_SHOP_STATEMENT.en);
-    expect(raised.counts.hold).toBe(1);
+    expect(raised.counts.review).toBe(1);
   });
 
   it("does not flag a seller against her own statement", () => {
